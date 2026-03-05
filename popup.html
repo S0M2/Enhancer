@@ -4,47 +4,53 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Enhancer</title>
+  <title>Enhancer — Portail & Moodle</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
+
+  <!-- ── Header ── -->
   <header class="hdr">
     <div class="hdr-left">
-      <img src="icons/icon48.png" class="hdr-logo" alt="">
+      <img src="icons/icon48.png" class="hdr-logo" alt="Enhancer logo">
       <div>
         <div class="hdr-title">Enhancer</div>
-        <div class="hdr-sub">v3.2 · Portail &amp; Moodle</div>
+        <div class="hdr-sub">v3.3 · Portail &amp; Moodle</div>
       </div>
     </div>
-    <label class="toggle">
+    <label class="toggle" title="Activer / Désactiver l'extension">
       <input type="checkbox" id="masterToggle" checked>
       <span class="track"><span class="thumb"></span></span>
     </label>
   </header>
 
-  <nav class="tabs">
-    <button class="tab active" data-tab="agenda">📅 Agenda</button>
-    <button class="tab" data-tab="couleurs">🎨 Couleurs</button>
-    <button class="tab" data-tab="moodle">🎓 Moodle</button>
-    <button class="tab" data-tab="portal">🌐 Portail</button>
-    <button class="tab" data-tab="custom">✏️ CSS</button>
+  <!-- ── Tabs ── -->
+  <nav class="tabs" role="tablist">
+    <button class="tab active" data-tab="agenda" role="tab">📅 Agenda</button>
+    <button class="tab" data-tab="couleurs" role="tab">🎨 Couleurs</button>
+    <button class="tab" data-tab="moodle" role="tab">🎓 Moodle</button>
+    <button class="tab" data-tab="portal" role="tab">🌐 Portail</button>
+    <button class="tab" data-tab="custom" role="tab">✏️ CSS</button>
   </nav>
 
-  <!-- AGENDA -->
-  <div class="panel active" id="tab-agenda">
+  <!-- ══ AGENDA ══ -->
+  <div class="panel active" id="tab-agenda" role="tabpanel">
     <div class="search-wrap">
-      <input type="text" id="agendaSearch" placeholder="🔍 Rechercher un cours…" class="search-input">
+      <input type="text" id="agendaSearch" placeholder="Rechercher un cours…" class="search-input" autocomplete="off"
+        spellcheck="false">
     </div>
     <div id="agendaList" class="course-list"></div>
   </div>
 
-  <!-- COULEURS -->
-  <div class="panel" id="tab-couleurs">
+  <!-- ══ COULEURS ══ -->
+  <div class="panel" id="tab-couleurs" role="tabpanel">
     <div class="search-wrap">
-      <input type="text" id="colorSearch" placeholder="🔍 Rechercher…" class="search-input">
+      <input type="text" id="colorSearch" placeholder="Rechercher un cours…" class="search-input" autocomplete="off"
+        spellcheck="false">
     </div>
     <div class="bulk-row">
       <button class="btn-sm" id="selectAll">✓ Tout</button>
@@ -58,8 +64,10 @@
     <div id="colorList" class="course-list"></div>
   </div>
 
-  <!-- MOODLE -->
-  <div class="panel" id="tab-moodle">
+  <!-- ══ MOODLE ══ -->
+  <div class="panel" id="tab-moodle" role="tabpanel">
+
+    <!-- Apparence -->
     <div class="section-title">Apparence</div>
 
     <div class="row-setting">
@@ -73,51 +81,171 @@
 
     <div class="row-setting">
       <div class="row-info">
-        <span class="row-label">Couleur d'accentuation</span>
+        <span class="row-label">Couleur d'accent</span>
         <span class="row-desc">Teinte principale de l'interface</span>
       </div>
       <input type="color" id="accentColor" value="#6366f1" class="color-pill">
     </div>
 
+    <div class="row-setting">
+      <div class="row-info">
+        <span class="row-label">Compacter les cours</span>
+        <span class="row-desc">Réduit la hauteur des cartes de cours</span>
+      </div>
+      <label class="toggle sm"><input type="checkbox" id="compactCards"><span class="track"><span
+            class="thumb"></span></span></label>
+    </div>
+
+    <div class="row-setting">
+      <div class="row-info">
+        <span class="row-label">Masquer les bannières</span>
+        <span class="row-desc">Supprime les images de fond des cartes</span>
+      </div>
+      <label class="toggle sm"><input type="checkbox" id="hideBanners"><span class="track"><span
+            class="thumb"></span></span></label>
+    </div>
+
+    <div class="row-setting">
+      <div class="row-info">
+        <span class="row-label">Animations désactivées</span>
+        <span class="row-desc">Interface plus légère, zéro transition</span>
+      </div>
+      <label class="toggle sm"><input type="checkbox" id="noAnimations"><span class="track"><span
+            class="thumb"></span></span></label>
+    </div>
+
+    <!-- Blocs visibles -->
     <div class="section-title mt">Blocs visibles</div>
+
     <div class="row-setting">
-      <div class="row-info"><span class="row-label">Timeline</span></div>
-      <label class="toggle sm"><input type="checkbox" id="showTimeline" checked><span class="track"><span
-            class="thumb"></span></span></label>
-    </div>
-    <div class="row-setting">
-      <div class="row-info"><span class="row-label">Calendrier</span></div>
-      <label class="toggle sm"><input type="checkbox" id="showCalendar" checked><span class="track"><span
-            class="thumb"></span></span></label>
-    </div>
-    <div class="row-setting">
-      <div class="row-info"><span class="row-label">Cours récents</span></div>
+      <div class="row-info">
+        <span class="row-label">Cours récents</span>
+        <span class="row-desc">Cartes des cours consultés récemment</span>
+      </div>
       <label class="toggle sm"><input type="checkbox" id="showRecent" checked><span class="track"><span
             class="thumb"></span></span></label>
     </div>
 
+    <div class="row-setting">
+      <div class="row-info">
+        <span class="row-label">Chronologie (Timeline)</span>
+        <span class="row-desc">Liste des devoirs et échéances</span>
+      </div>
+      <label class="toggle sm"><input type="checkbox" id="showTimeline" checked><span class="track"><span
+            class="thumb"></span></span></label>
+    </div>
+
+    <div class="row-setting">
+      <div class="row-info">
+        <span class="row-label">Calendrier</span>
+        <span class="row-desc">Bloc calendrier mensuel</span>
+      </div>
+      <label class="toggle sm"><input type="checkbox" id="showCalendar" checked><span class="track"><span
+            class="thumb"></span></span></label>
+    </div>
+
+    <div class="row-setting">
+      <div class="row-info">
+        <span class="row-label">Prochain agenda (CCE)</span>
+        <span class="row-desc">Bloc "Cours potentiels" sur le dashboard</span>
+      </div>
+      <label class="toggle sm"><input type="checkbox" id="showNextTimeline" checked><span class="track"><span
+            class="thumb"></span></span></label>
+    </div>
+
+    <!-- Masquer éléments -->
     <div class="section-title mt">Masquer éléments</div>
+
     <div class="row-setting">
-      <div class="row-info"><span class="row-label">Notifications / Nav user</span></div>
-      <label class="toggle sm"><input type="checkbox" id="hideNotifs"><span class="track"><span
+      <div class="row-info">
+        <span class="row-label">Barre de navigation</span>
+        <span class="row-desc">.navbar.fixed-top (logo + liens)</span>
+      </div>
+      <label class="toggle sm"><input type="checkbox" id="hideNavbarM"><span class="track"><span
             class="thumb"></span></span></label>
     </div>
+
     <div class="row-setting">
-      <div class="row-info"><span class="row-label">Footer</span></div>
-      <label class="toggle sm"><input type="checkbox" id="hideFooterM"><span class="track"><span
-            class="thumb"></span></span></label>
-    </div>
-    <div class="row-setting">
-      <div class="row-info"><span class="row-label">Sidebar / Drawer</span></div>
+      <div class="row-info">
+        <span class="row-label">Sidebar (drawer)</span>
+        <span class="row-desc">.drawer-left — panneau latéral gauche</span>
+      </div>
       <label class="toggle sm"><input type="checkbox" id="hideSidebar"><span class="track"><span
             class="thumb"></span></span></label>
     </div>
+
+    <div class="row-setting">
+      <div class="row-info">
+        <span class="row-label">En-tête de page</span>
+        <span class="row-desc">#page-header — titre "Tableau de bord"</span>
+      </div>
+      <label class="toggle sm"><input type="checkbox" id="hidePageHeader"><span class="track"><span
+            class="thumb"></span></span></label>
+    </div>
+
+    <div class="row-setting">
+      <div class="row-info">
+        <span class="row-label">Notifications / User nav</span>
+        <span class="row-desc">#usernavigation — cloche + avatar</span>
+      </div>
+      <label class="toggle sm"><input type="checkbox" id="hideNotifs"><span class="track"><span
+            class="thumb"></span></span></label>
+    </div>
+
+    <div class="row-setting">
+      <div class="row-info">
+        <span class="row-label">Mode édition (switch)</span>
+        <span class="row-desc">Bouton "Mode d'édition" dans la navbar</span>
+      </div>
+      <label class="toggle sm"><input type="checkbox" id="hideEditMode"><span class="track"><span
+            class="thumb"></span></span></label>
+    </div>
+
+    <div class="row-setting">
+      <div class="row-info">
+        <span class="row-label">Footer Moodle</span>
+        <span class="row-desc">Pied de page et mentions légales</span>
+      </div>
+      <label class="toggle sm"><input type="checkbox" id="hideFooterM"><span class="track"><span
+            class="thumb"></span></span></label>
+    </div>
+
+    <!-- Cours cards -->
+    <div class="section-title mt">Affichage des cours</div>
+
+    <div class="row-setting">
+      <div class="row-info">
+        <span class="row-label">Afficher le nom de catégorie</span>
+        <span class="row-desc">Texte grisé en dessous du nom du cours</span>
+      </div>
+      <label class="toggle sm"><input type="checkbox" id="showCourseCategory" checked><span class="track"><span
+            class="thumb"></span></span></label>
+    </div>
+
+    <div class="row-setting">
+      <div class="row-info">
+        <span class="row-label">Icône favori étoile</span>
+        <span class="row-desc">⭐ indiquant un cours favori</span>
+      </div>
+      <label class="toggle sm"><input type="checkbox" id="showFavourite" checked><span class="track"><span
+            class="thumb"></span></span></label>
+    </div>
+
+    <div class="row-setting">
+      <div class="row-info">
+        <span class="row-label">Pagination des cours</span>
+        <span class="row-desc">Flèches de pagination (◀ ▶)</span>
+      </div>
+      <label class="toggle sm"><input type="checkbox" id="showPagination" checked><span class="track"><span
+            class="thumb"></span></span></label>
+    </div>
+
   </div>
 
-  <!-- PORTAIL -->
-  <div class="panel" id="tab-portal">
-    <div class="section-title">Thème</div>
+  <!-- ══ PORTAIL ══ -->
+  <div class="panel" id="tab-portal" role="tabpanel">
 
+    <div class="section-title">Thème</div>
     <div class="theme-grid">
       <button class="theme-btn active" data-theme="default">
         <div class="theme-preview tp-default">
@@ -154,7 +282,7 @@
       </button>
     </div>
 
-    <div class="row-setting" style="margin-top:10px">
+    <div class="row-setting">
       <div class="row-info">
         <span class="row-label">Couleur d'accent</span>
         <span class="row-desc">Boutons, liens, surbrillances</span>
@@ -180,8 +308,8 @@
     </div>
   </div>
 
-  <!-- CSS CUSTOM -->
-  <div class="panel" id="tab-custom">
+  <!-- ══ CSS CUSTOM ══ -->
+  <div class="panel" id="tab-custom" role="tabpanel">
     <div class="css-tabs">
       <button class="css-tab active" data-target="css-moodle-wrap">Moodle</button>
       <button class="css-tab" data-target="css-portal-wrap">Portail</button>
@@ -194,7 +322,8 @@
         <span class="preset-lbl">Presets :</span>
         <button class="preset-btn" data-css-target="moodle" data-preset="hideHeader"># Header</button>
         <button class="preset-btn" data-css-target="moodle" data-preset="bigCards">Cards XL</button>
-        <button class="preset-btn" data-css-target="moodle" data-preset="noBanner"># Bannière</button>
+        <button class="preset-btn" data-css-target="moodle" data-preset="noBanner"># Bannières</button>
+        <button class="preset-btn" data-css-target="moodle" data-preset="wideCards">Cards larges</button>
         <button class="preset-btn" data-css-target="moodle" data-preset="clearAll">🗑 Vider</button>
       </div>
     </div>
@@ -211,15 +340,17 @@
     </div>
   </div>
 
+  <!-- ── Footer ── -->
   <footer class="footer">
-    <span class="status" id="statusMsg"></span>
+    <span class="status" id="statusMsg" aria-live="polite"></span>
     <button class="save-btn" id="saveBtn">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+        aria-hidden="true">
         <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z" />
         <polyline points="17 21 17 13 7 13 7 21" />
         <polyline points="7 3 7 8 15 8" />
       </svg>
-      Sauvegarder &amp; Appliquer
+      <span id="saveBtnLabel">Sauvegarder &amp; Appliquer</span>
     </button>
   </footer>
 

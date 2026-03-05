@@ -1,14 +1,15 @@
-// ═══════════════════════════════════════════════
-//  ENHANCER — popup.js v3.2
-// ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
+//  ENHANCER — popup.js v3.3
+// ═══════════════════════════════════════════════════════
 
-// ── Constants ──────────────────────────────────
+// ── Constants ────────────────────────────────────────────
 
 const CSS_PRESETS = {
   moodle: {
-    hideHeader: `/* Cacher le header */\n#page-header, .page-header-headings { display: none !important; }`,
-    bigCards: `/* Cards de cours plus grandes */\n.course-card { min-height: 200px !important; }\n.course-card .coursename { font-size: 16px !important; font-weight: 800 !important; }`,
-    noBanner: `/* Cacher les bannières */\n.course-card .card-img { display: none !important; }\n.course-card { padding-top: 12px !important; }`,
+    hideHeader: `/* Cacher le header Moodle */\n#page-header, .page-header-headings { display: none !important; }`,
+    bigCards: `/* Cards de cours plus grandes */\n.course-card { min-height: 220px !important; }\n.course-card .coursename { font-size: 15px !important; font-weight: 800 !important; }`,
+    noBanner: `/* Cacher les bannières de cours */\n.course-card .card-img-top { display: none !important; }\n.course-card { padding-top: 0 !important; }`,
+    wideCards: `/* Cartes larges (pleine largeur) */\n.card-carousel { flex-wrap: wrap !important; }\n.card-carousel .course-card { flex: 1 1 calc(50% - 8px) !important; min-width: 200px !important; }`,
     clearAll: '',
   },
   portal: {
@@ -21,7 +22,7 @@ const CSS_PRESETS = {
 const HEX_RE = /^#[0-9a-fA-F]{6}$/;
 const DEFAULT_COLOR = '#6366f1';
 
-// ── State ───────────────────────────────────────
+// ── State ─────────────────────────────────────────────────
 
 let courseSettings = {};
 let knownCourses = [];
@@ -30,7 +31,7 @@ let portalSettings = {};
 let customCSS = { moodle: '', portal: '' };
 let enabled = true;
 
-// ── Bootstrap ───────────────────────────────────
+// ── Bootstrap ─────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', () => {
   loadData();
@@ -45,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
   bindMasterToggle();
 });
 
-// ── Data loading ────────────────────────────────
+// ── Data loading ──────────────────────────────────────────
 
 function loadData() {
   const keys = ['courseSettings', 'knownCourses', 'moodleSettings', 'portalSettings', 'customCSS', 'extensionEnabled'];
@@ -59,14 +60,28 @@ function loadData() {
 
     const m = res.moodleSettings || {};
     moodleSettings = {
+      // Appearance
       dark: m.darkEnabled ?? m.dark ?? true,
+      accentColor: m.accentColor || DEFAULT_COLOR,
+      compactCards: m.compactCards ?? false,
+      hideBanners: m.hideBanners ?? false,
+      noAnimations: m.noAnimations ?? false,
+      // Visible blocks
       timeline: m.showTimeline ?? m.timeline ?? true,
       calendar: m.showCalendar ?? m.calendar ?? true,
       recent: m.showRecent ?? m.recent ?? true,
-      hideNotifs: m.hideNotifs ?? false,
-      hideFooter: m.hideFooter ?? false,
+      showNextTimeline: m.showNextTimeline ?? true,
+      // Hide elements
+      hideNavbar: m.hideNavbar ?? false,
       hideSidebar: m.hideSidebar ?? false,
-      accentColor: m.accentColor || DEFAULT_COLOR,
+      hidePageHeader: m.hidePageHeader ?? false,
+      hideNotifs: m.hideNotifs ?? false,
+      hideEditMode: m.hideEditMode ?? false,
+      hideFooter: m.hideFooter ?? false,
+      // Course card display
+      showCourseCategory: m.showCourseCategory !== false,
+      showFavourite: m.showFavourite !== false,
+      showPagination: m.showPagination !== false,
     };
 
     const p = res.portalSettings || {};
@@ -87,16 +102,32 @@ function loadData() {
 
 function syncUI() {
   setVal('masterToggle', enabled);
+
+  // Moodle
   setVal('darkMode', moodleSettings.dark);
   setVal('accentColor', moodleSettings.accentColor);
+  setVal('compactCards', moodleSettings.compactCards);
+  setVal('hideBanners', moodleSettings.hideBanners);
+  setVal('noAnimations', moodleSettings.noAnimations);
   setVal('showTimeline', moodleSettings.timeline);
   setVal('showCalendar', moodleSettings.calendar);
   setVal('showRecent', moodleSettings.recent);
-  setVal('hideNotifs', moodleSettings.hideNotifs);
-  setVal('hideFooterM', moodleSettings.hideFooter);
+  setVal('showNextTimeline', moodleSettings.showNextTimeline);
+  setVal('hideNavbarM', moodleSettings.hideNavbar);
   setVal('hideSidebar', moodleSettings.hideSidebar);
+  setVal('hidePageHeader', moodleSettings.hidePageHeader);
+  setVal('hideNotifs', moodleSettings.hideNotifs);
+  setVal('hideEditMode', moodleSettings.hideEditMode);
+  setVal('hideFooterM', moodleSettings.hideFooter);
+  setVal('showCourseCategory', moodleSettings.showCourseCategory);
+  setVal('showFavourite', moodleSettings.showFavourite);
+  setVal('showPagination', moodleSettings.showPagination);
+
+  // CSS editors
   setVal('cssMoodle', customCSS.moodle);
   setVal('cssPortal', customCSS.portal);
+
+  // Portal
   setVal('portalAccent', portalSettings.accentColor);
   setVal('portalHideNavbar', portalSettings.hideNavbar);
   setVal('portalHideFooter', portalSettings.hideFooter);
@@ -107,8 +138,8 @@ function syncUI() {
 function setVal(id, value) {
   const el = document.getElementById(id);
   if (!el) return;
-  if (el.type === 'checkbox') el.checked = value;
-  else el.value = value;
+  if (el.type === 'checkbox') el.checked = !!value;
+  else el.value = value ?? '';
 }
 
 function syncCoursesFromTab() {
@@ -119,13 +150,14 @@ function syncCoursesFromTab() {
       const added = res.courses.filter(c => !knownCourses.includes(c));
       if (!added.length) return;
       knownCourses = [...new Set([...knownCourses, ...added])].sort();
+      chrome.storage.local.set({ knownCourses });
       renderAgendaTab();
       renderColorTab();
     });
   });
 }
 
-// ── Agenda tab ──────────────────────────────────
+// ── Agenda tab ────────────────────────────────────────────
 
 function renderAgendaTab(filter = '') {
   const list = document.getElementById('agendaList');
@@ -144,19 +176,27 @@ function renderAgendaTab(filter = '') {
       }))
       .sort((a, b) => a.startMs - b.startMs);
 
-    renderPotentials(list, future, now);
+    if (!filter) renderPotentials(list, future, now);
 
     if (!future.length) {
       renderSimpleList(list, filter);
       return;
     }
 
-    const groups = groupByDate(future);
-    Object.keys(groups).sort().slice(0, 6).forEach(date => {
-      list.appendChild(makeDayLabel(date, today));
-      groups[date]
-        .filter(ev => !filter || ev.courseName.toLowerCase().includes(filter))
-        .forEach(ev => list.appendChild(makeAgendaRow(ev)));
+    const filtered = future.filter(ev =>
+      !filter || ev.courseName.toLowerCase().includes(filter)
+    );
+
+    if (!filtered.length) {
+      list.appendChild(emptyMsg(filter ? `Aucun cours pour "${filter}"` : 'Navigue sur ton agenda pour charger les cours'));
+      return;
+    }
+
+    const groups = groupByDate(filtered);
+    Object.keys(groups).sort().slice(0, 7).forEach(date => {
+      const dayEvents = groups[date];
+      list.appendChild(makeDayLabel(date, today, dayEvents.length));
+      dayEvents.forEach(ev => list.appendChild(makeAgendaRow(ev)));
     });
   });
 }
@@ -170,7 +210,7 @@ function renderPotentials(list, future, now) {
   if (!items.length) return;
 
   const section = el('div', 'potential-section');
-  section.appendChild(el('div', 'potential-lbl', '⚡ COURS POTENTIELS'));
+  section.appendChild(el('div', 'potential-lbl', 'COURS POTENTIELS'));
   section.appendChild(el('div', 'potential-hint', 'Cours Moodle à ouvrir maintenant'));
   items.forEach(ev => section.appendChild(makePotentialCard(ev, ev === current)));
   list.appendChild(section);
@@ -182,14 +222,10 @@ function makePotentialCard(ev, isCurrent) {
   const card = el('div', `potential-card${isCurrent ? ' is-current' : ''}`);
   card.style.borderLeftColor = color;
 
-  const statusDot = isCurrent ? '<span class="pot-dot"></span>' : '';
-  const statusTxt = isCurrent ? 'EN COURS' : '⏭ SUIVANT';
-
   const top = el('div', 'pot-top');
   const status = el('span', 'pot-status');
   if (isCurrent) {
-    const dot = el('span', 'pot-dot');
-    status.append(dot, 'EN COURS');
+    status.append(el('span', 'pot-dot'), ' EN COURS');
   } else {
     status.textContent = '⏭ SUIVANT';
   }
@@ -198,18 +234,15 @@ function makePotentialCard(ev, isCurrent) {
 
   const name = el('div', 'pot-name', ev.courseName);
   const meta = el('div', 'pot-meta', `📍 ${ev.parsed?.room || '—'}${ev.parsed?.prof ? ' · 👤 ' + ev.parsed.prof : ''}`);
-
   card.append(top, name, meta);
 
   if (s.link) {
     const a = el('a', 'pot-btn', '🔗 Ouvrir le cours Moodle');
-    a.href = s.link;
-    a.target = '_blank';
+    a.href = s.link; a.target = '_blank'; a.rel = 'noopener noreferrer';
     card.appendChild(a);
   } else {
-    card.appendChild(el('div', 'pot-no-link', 'Aucun lien — ajoutez-le dans Couleurs'));
+    card.appendChild(el('div', 'pot-no-link', "Aucun lien — ajoutez-le dans l'onglet Couleurs"));
   }
-
   return card;
 }
 
@@ -217,6 +250,8 @@ function makeAgendaRow(ev) {
   const s = courseSettings[ev.courseName] || {};
   const col = s.color || DEFAULT_COLOR;
   const row = el('div', 'course-row');
+  row.style.setProperty('--course-color', col);
+
   const time = el('span', 'course-time', `${fmt(ev.sh, ev.sm)}–${fmt(ev.eh, ev.em)}`);
   const swatch = el('div', 'color-swatch');
   swatch.style.background = col;
@@ -224,19 +259,23 @@ function makeAgendaRow(ev) {
   name.title = ev.courseName;
 
   row.append(time, swatch, name);
-  if (ev.parsed?.room) row.appendChild(el('span', 'course-tag', ev.parsed.room.split(',')[0]));
+  if (ev.parsed?.room) {
+    const room = ev.parsed.room.split(',')[0].trim();
+    if (room) row.appendChild(el('span', 'course-tag', room));
+  }
   return row;
 }
 
 function renderSimpleList(list, filter = '') {
   const courses = knownCourses.filter(c => !filter || c.toLowerCase().includes(filter));
   if (!courses.length) {
-    list.appendChild(el('div', 'empty-msg', 'Navigue sur ton agenda pour charger les cours'));
+    list.appendChild(emptyMsg(filter ? `Aucun cours pour "${filter}"` : 'Navigue sur ton agenda pour charger les cours'));
     return;
   }
   courses.forEach(name => {
     const col = courseSettings[name]?.color || DEFAULT_COLOR;
     const row = el('div', 'course-row');
+    row.style.setProperty('--course-color', col);
     const swatch = el('div', 'color-swatch');
     swatch.style.background = col;
     const nameSpan = el('span', 'course-name', name);
@@ -246,7 +285,7 @@ function renderSimpleList(list, filter = '') {
   });
 }
 
-// ── Color tab ───────────────────────────────────
+// ── Color tab ─────────────────────────────────────────────
 
 function renderColorTab(filter = '') {
   const list = document.getElementById('colorList');
@@ -254,7 +293,7 @@ function renderColorTab(filter = '') {
 
   const courses = knownCourses.filter(c => !filter || c.toLowerCase().includes(filter));
   if (!courses.length) {
-    list.appendChild(el('div', 'empty-msg', 'Aucun cours — navigue sur le Portail'));
+    list.appendChild(emptyMsg(filter ? `Aucun cours pour "${filter}"` : 'Aucun cours — navigue sur le Portail'));
     return;
   }
 
@@ -263,24 +302,22 @@ function renderColorTab(filter = '') {
     const col = s.color || DEFAULT_COLOR;
     const vis = s.visible !== false;
     const link = s.link || '';
-    const bac = (name.match(/\[BAC\s*([1-3])\]/i) || [])[1];
+    const bacMatch = name.match(/\[?BAC\s*([1-3])\]?/i);
+    const bac = bacMatch ? bacMatch[1] : null;
 
     const row = el('div', 'color-row');
+    row.style.setProperty('--course-color', col);
     const main = el('div', 'color-row-main');
 
     const visCb = el('input', 'vis-check');
-    visCb.type = 'checkbox';
-    visCb.checked = vis;
+    visCb.type = 'checkbox'; visCb.checked = vis;
 
     const swatch = el('div', 'color-swatch');
     swatch.style.background = col;
 
     const hexInp = el('input', 'hex-input');
-    hexInp.type = 'text';
-    hexInp.value = col;
-    hexInp.placeholder = '#6366f1';
-    hexInp.maxLength = 7;
-    hexInp.spellcheck = false;
+    hexInp.type = 'text'; hexInp.value = col;
+    hexInp.placeholder = '#6366f1'; hexInp.maxLength = 7; hexInp.spellcheck = false;
 
     const nameSpan = el('span', 'course-name', name);
     nameSpan.title = name;
@@ -289,15 +326,12 @@ function renderColorTab(filter = '') {
     if (bac) main.appendChild(el('span', 'course-tag', `BAC ${bac}`));
 
     const linkRow = el('div', 'link-row');
-    const linkIcon = el('span', 'link-icon', '🔗');
     const linkInp = el('input', 'link-input');
-    linkInp.type = 'text';
-    linkInp.placeholder = 'URL Moodle du cours…';
-    linkInp.value = link;
-    linkRow.append(linkIcon, linkInp);
+    linkInp.type = 'text'; linkInp.placeholder = 'URL du cours Moodle…';
+    linkInp.value = link; linkInp.autocomplete = 'off'; linkInp.spellcheck = false;
+    linkRow.append(el('span', 'link-icon', '🔗'), linkInp);
 
     row.append(main, linkRow);
-
 
     hexInp.addEventListener('input', () => {
       let v = hexInp.value.trim();
@@ -305,23 +339,22 @@ function renderColorTab(filter = '') {
       hexInp.value = v;
       if (HEX_RE.test(v)) {
         swatch.style.background = v;
-        hexInp.dataset.valid = 'true';
-        hexInp.style.color = '';
+        row.style.setProperty('--course-color', v);
+        hexInp.classList.remove('invalid');
         ensureSetting(name).color = v;
       } else {
-        hexInp.dataset.valid = 'false';
-        hexInp.style.color = '#ef4444';
+        hexInp.classList.add('invalid');
       }
     });
-
     hexInp.addEventListener('blur', () => {
-      if (hexInp.dataset.valid === 'false') {
-        hexInp.value = courseSettings[name]?.color || DEFAULT_COLOR;
-        hexInp.style.color = '';
-        swatch.style.background = hexInp.value;
+      if (hexInp.classList.contains('invalid')) {
+        const saved = courseSettings[name]?.color || DEFAULT_COLOR;
+        hexInp.value = saved;
+        swatch.style.background = saved;
+        row.style.setProperty('--course-color', saved);
+        hexInp.classList.remove('invalid');
       }
     });
-
     visCb.addEventListener('change', () => { ensureSetting(name).visible = visCb.checked; });
     linkInp.addEventListener('input', () => { ensureSetting(name).link = linkInp.value.trim(); });
 
@@ -329,7 +362,7 @@ function renderColorTab(filter = '') {
   });
 }
 
-// ── Tab navigation ──────────────────────────────
+// ── Tab navigation ────────────────────────────────────────
 
 function bindTabs() {
   const tabs = [...document.querySelectorAll('.tab')];
@@ -357,17 +390,31 @@ function bindCssTabs() {
   });
 }
 
-// ── Moodle settings ─────────────────────────────
+// ── Moodle settings ───────────────────────────────────────
 
 function bindMoodleToggles() {
   const toggleMap = {
+    // Appearance
     darkMode: 'dark',
+    compactCards: 'compactCards',
+    hideBanners: 'hideBanners',
+    noAnimations: 'noAnimations',
+    // Visible blocks
     showTimeline: 'timeline',
     showCalendar: 'calendar',
     showRecent: 'recent',
-    hideNotifs: 'hideNotifs',
-    hideFooterM: 'hideFooter',
+    showNextTimeline: 'showNextTimeline',
+    // Hide elements
+    hideNavbarM: 'hideNavbar',
     hideSidebar: 'hideSidebar',
+    hidePageHeader: 'hidePageHeader',
+    hideNotifs: 'hideNotifs',
+    hideEditMode: 'hideEditMode',
+    hideFooterM: 'hideFooter',
+    // Course card display
+    showCourseCategory: 'showCourseCategory',
+    showFavourite: 'showFavourite',
+    showPagination: 'showPagination',
   };
   Object.entries(toggleMap).forEach(([id, key]) => {
     document.getElementById(id)?.addEventListener('change', e => {
@@ -379,7 +426,7 @@ function bindMoodleToggles() {
   });
 }
 
-// ── Portal settings ─────────────────────────────
+// ── Portal settings ───────────────────────────────────────
 
 function bindPortalControls() {
   document.querySelectorAll('.theme-btn').forEach(btn => {
@@ -388,11 +435,9 @@ function bindPortalControls() {
       setActiveThemeBtn(btn.dataset.theme);
     });
   });
-
   document.getElementById('portalAccent')?.addEventListener('input', e => {
     portalSettings.accentColor = e.target.value;
   });
-
   const hideMap = {
     portalHideNavbar: 'hideNavbar',
     portalHideFooter: 'hideFooter',
@@ -411,7 +456,7 @@ function setActiveThemeBtn(theme) {
   });
 }
 
-// ── CSS presets ──────────────────────────────────
+// ── CSS presets ───────────────────────────────────────────
 
 function bindPresets() {
   document.querySelectorAll('.preset-btn').forEach(btn => {
@@ -424,45 +469,51 @@ function bindPresets() {
       if (!ta) return;
       ta.value = preset === 'clearAll' ? '' : (ta.value ? ta.value + '\n\n' : '') + css;
       ta.focus();
+      ta.selectionStart = ta.selectionEnd = ta.value.length;
     });
   });
 }
 
-// ── Bulk actions ─────────────────────────────────
+// ── Bulk actions ──────────────────────────────────────────
 
 function bindBulkActions() {
   const getFilter = () => document.getElementById('colorSearch')?.value?.toLowerCase() || '';
-
   document.getElementById('selectAll')?.addEventListener('click', () => {
     knownCourses.forEach(n => { ensureSetting(n).visible = true; });
     renderColorTab(getFilter());
   });
-
   document.getElementById('deselectAll')?.addEventListener('click', () => {
     knownCourses.forEach(n => { ensureSetting(n).visible = false; });
     renderColorTab(getFilter());
   });
-
   document.querySelectorAll('.btn-bac').forEach(btn => {
     btn.addEventListener('click', () => {
       const bac = btn.dataset.bac;
-      const matches = knownCourses.filter(c => c.includes(`BAC ${bac}`) || c.includes(`[BAC${bac}]`));
+      const matches = knownCourses.filter(c => {
+        const m = c.match(/\[?BAC\s*([1-3])\]?/i);
+        return m && m[1] === bac;
+      });
       if (!matches.length) return;
       const allVisible = matches.every(c => courseSettings[c]?.visible !== false);
       matches.forEach(c => { ensureSetting(c).visible = !allVisible; });
+      btn.classList.toggle('active', !allVisible);
       renderColorTab(getFilter());
     });
   });
 }
 
-// ── Search ───────────────────────────────────────
+// ── Search ────────────────────────────────────────────────
 
 function bindSearch() {
-  document.getElementById('agendaSearch')?.addEventListener('input', e => renderAgendaTab(e.target.value.toLowerCase()));
-  document.getElementById('colorSearch')?.addEventListener('input', e => renderColorTab(e.target.value.toLowerCase()));
+  document.getElementById('agendaSearch')?.addEventListener('input', e => {
+    renderAgendaTab(e.target.value.toLowerCase().trim());
+  });
+  document.getElementById('colorSearch')?.addEventListener('input', e => {
+    renderColorTab(e.target.value.toLowerCase().trim());
+  });
 }
 
-// ── Master toggle ────────────────────────────────
+// ── Master toggle ─────────────────────────────────────────
 
 function bindMasterToggle() {
   document.getElementById('masterToggle')?.addEventListener('change', e => {
@@ -474,18 +525,16 @@ function bindMasterToggle() {
   });
 }
 
-// ── Save ─────────────────────────────────────────
+// ── Save ──────────────────────────────────────────────────
 
 function bindSave() {
   document.getElementById('saveBtn')?.addEventListener('click', save);
 }
 
 function save() {
-  // Collect CSS
   customCSS.moodle = document.getElementById('cssMoodle')?.value || '';
   customCSS.portal = document.getElementById('cssPortal')?.value || '';
 
-  // Collect color/link/visibility from colorList
   document.querySelectorAll('#colorList .color-row').forEach(row => {
     const name = row.querySelector('.course-name')?.title;
     if (!name) return;
@@ -499,29 +548,32 @@ function save() {
     if (linkInp) s.link = linkInp.value.trim();
   });
 
+  // Build moodleSettings with legacy compat keys
   const ms = {
     ...moodleSettings,
-    // Legacy keys for backward compat
     darkEnabled: moodleSettings.dark,
     showTimeline: moodleSettings.timeline,
     showCalendar: moodleSettings.calendar,
     showRecent: moodleSettings.recent,
   };
 
-  chrome.storage.local.set({ courseSettings, moodleSettings: ms, portalSettings, customCSS, extensionEnabled: enabled }, () => {
-    chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
-      if (tabs[0]?.id) {
-        chrome.tabs.sendMessage(tabs[0].id, {
-          action: 'apply_settings',
-          settings: courseSettings,
-          moodleSettings: ms,
-          portalSettings,
-          customCSS,
-        });
-      }
-    });
-    showSaveConfirm();
-  });
+  chrome.storage.local.set(
+    { courseSettings, moodleSettings: ms, portalSettings, customCSS, extensionEnabled: enabled },
+    () => {
+      chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+        if (tabs[0]?.id) {
+          chrome.tabs.sendMessage(tabs[0].id, {
+            action: 'apply_settings',
+            settings: courseSettings,
+            moodleSettings: ms,
+            portalSettings,
+            customCSS,
+          });
+        }
+      });
+      showSaveConfirm();
+    }
+  );
 }
 
 function showSaveConfirm() {
@@ -529,26 +581,26 @@ function showSaveConfirm() {
   if (status) {
     status.textContent = '✓ Sauvegardé !';
     status.classList.add('show');
-    setTimeout(() => status.classList.remove('show'), 2500);
+    setTimeout(() => { status.classList.remove('show'); status.textContent = ''; }, 2500);
   }
   const btn = document.getElementById('saveBtn');
-  if (!btn) return;
-  btn.textContent = '✓ Appliqué !';
-  btn.style.background = 'linear-gradient(135deg,#22c55e,#16a34a)';
+  const label = document.getElementById('saveBtnLabel');
+  if (!btn || !label) return;
+  label.textContent = '✓ Appliqué !';
+  btn.classList.add('saved');
   setTimeout(() => {
-    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Sauvegarder & Appliquer`;
-    btn.style.background = '';
+    label.textContent = 'Sauvegarder & Appliquer';
+    btn.classList.remove('saved');
   }, 2000);
 }
 
-// ── Helpers ──────────────────────────────────────
+// ── Helpers ───────────────────────────────────────────────
 
 function ensureSetting(name) {
   if (!courseSettings[name]) courseSettings[name] = {};
   return courseSettings[name];
 }
 
-/** Create element with optional class and text */
 function el(tag, className = '', text = '') {
   const e = document.createElement(tag);
   if (className) e.className = className;
@@ -556,33 +608,23 @@ function el(tag, className = '', text = '') {
   return e;
 }
 
-function fmt(h, m) {
-  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-}
-
-function toMs(date, h, m) {
-  return +new Date(`${date}T${fmt(h, m)}:00`);
-}
-
-function todayStr() {
-  return new Date().toLocaleDateString('en-CA');
-}
-
+function emptyMsg(text) { return el('div', 'empty-msg', text); }
+function fmt(h, m) { return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`; }
+function toMs(date, h, m) { return +new Date(`${date}T${fmt(h, m)}:00`); }
+function todayStr() { return new Date().toLocaleDateString('en-CA'); }
 function groupByDate(events) {
   return events.reduce((acc, ev) => {
     (acc[ev.date] = acc[ev.date] || []).push(ev);
     return acc;
   }, {});
 }
-
-function makeDayLabel(date, today) {
+function makeDayLabel(date, today, count) {
   const isToday = date === today;
-  const label = isToday
+  const text = isToday
     ? "Aujourd'hui"
     : capitalize(new Date(date + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }));
-  return el('div', 'day-label', label);
+  const div = el('div', 'day-label', text);
+  if (count > 1) div.appendChild(el('span', 'day-count', `${count} cours`));
+  return div;
 }
-
-function capitalize(s) {
-  return s.charAt(0).toUpperCase() + s.slice(1);
-}
+function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }

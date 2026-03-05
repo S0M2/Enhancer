@@ -18,7 +18,8 @@ function debounce(fn, ms) {
   return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
 }
 
-const defMoodle = () => ({ dark: true, timeline: true, calendar: true, recent: true, hideFooter: false, hideSidebar: false, hideNotifs: false, accentColor: '#6366f1' });
+const defMoodle = () => ({ dark: true, accentColor: '#6366f1', compactCards: false, hideBanners: false, noAnimations: false, timeline: true, calendar: true, recent: true, showNextTimeline: true, hideNavbar: false, hideSidebar: false, hidePageHeader: false, hideNotifs: false, hideEditMode: false, hideFooter: false, showCourseCategory: true, showFavourite: true, showPagination: true });
+
 const defPortal = () => ({ theme: 'default', accentColor: '#6366f1', hideNavbar: false, hideFooter: false, hideSidebar: false });
 
 function normPS(s) {
@@ -85,15 +86,26 @@ function normMS(s) {
   if (!s) return d;
   return {
     dark: s.darkEnabled ?? s.dark ?? d.dark,
+    accentColor: s.accentColor || d.accentColor,
+    compactCards: s.compactCards ?? d.compactCards,
+    hideBanners: s.hideBanners ?? d.hideBanners,
+    noAnimations: s.noAnimations ?? d.noAnimations,
     timeline: s.showTimeline ?? s.timeline ?? d.timeline,
     calendar: s.showCalendar ?? s.calendar ?? d.calendar,
     recent: s.showRecent ?? s.recent ?? d.recent,
-    hideFooter: s.hideFooter ?? d.hideFooter,
+    showNextTimeline: s.showNextTimeline ?? d.showNextTimeline,
+    hideNavbar: s.hideNavbar ?? d.hideNavbar,
     hideSidebar: s.hideSidebar ?? d.hideSidebar,
+    hidePageHeader: s.hidePageHeader ?? d.hidePageHeader,
     hideNotifs: s.hideNotifs ?? d.hideNotifs,
-    accentColor: s.accentColor || d.accentColor,
+    hideEditMode: s.hideEditMode ?? d.hideEditMode,
+    hideFooter: s.hideFooter ?? d.hideFooter,
+    showCourseCategory: s.showCourseCategory !== false,
+    showFavourite: s.showFavourite !== false,
+    showPagination: s.showPagination !== false,
   };
 }
+
 
 function setEnabled(val) {
   enabled = val;
@@ -557,18 +569,82 @@ function applyMoodleStyle() {
   let vs = document.getElementById('cce-moodle-vars');
   if (!vs) { vs = document.createElement('style'); vs.id = 'cce-moodle-vars'; document.head.appendChild(vs); }
   vs.textContent = `:root{--cce-accent:${accent};--cce-glow:${rgba(accent, 0.25)};}`;
+
+  // ── Dark mode ──
   if (moodleSettings.dark) document.body.classList.add('cce-dark'); else document.body.classList.remove('cce-dark');
-  const bm = { timeline: moodleSettings.timeline, calendar_month: moodleSettings.calendar, recentlyaccessedcourses: moodleSettings.recent };
-  for (const [k, show] of Object.entries(bm)) { const el = document.querySelector(`[data-block="${k}"]`); if (el) el.style.display = show ? '' : ' none'; }
-  const hide = (sel, flag) => { document.querySelectorAll(sel).forEach(el => el.style.display = flag ? 'none' : ''); };
+
+  // ── Visible blocks ──
+  const blockMap = { timeline: moodleSettings.timeline, calendar_month: moodleSettings.calendar, recentlyaccessedcourses: moodleSettings.recent };
+  for (const [k, show] of Object.entries(blockMap)) { const el = document.querySelector(`[data-block="${k}"]`); if (el) el.style.display = show ? '' : 'none'; }
+
+  // ── CCE next timeline ──
+  const ntEl = document.getElementById('cce-next-timeline');
+  if (ntEl) ntEl.style.display = moodleSettings.showNextTimeline === false ? 'none' : '';
+
+  // ── Helper ──
+  const hide = (sel, flag) => document.querySelectorAll(sel).forEach(el => el.style.display = flag ? 'none' : '');
+  const show = (sel, flag) => document.querySelectorAll(sel).forEach(el => el.style.display = flag === false ? 'none' : '');
+
+  // ── Hide elements ──
+  hide('.navbar.fixed-top, nav.navbar', moodleSettings.hideNavbar);
+  if (moodleSettings.hideNavbar) {
+    document.body.style.paddingTop = '0';
+  } else {
+    document.body.style.paddingTop = '';
+  }
   hide('#usernavigation,.usermenu', moodleSettings.hideNotifs);
-  hide('#page-footer', moodleSettings.hideFooter);
-  hide('.drawer,[data-region="drawer"]', moodleSettings.hideSidebar);
+  hide('.drawer.drawer-left,.drawer-primary,[data-region="fixed-drawer"]', moodleSettings.hideSidebar);
+  hide('#page-header,.page-context-header,.page-header-headings', moodleSettings.hidePageHeader);
+  hide('.editmode-switch-form', moodleSettings.hideEditMode);
+  hide('#page-footer,footer', moodleSettings.hideFooter);
+
+  // ── No animations ──
+  let aniStyle = document.getElementById('cce-no-ani');
+  if (moodleSettings.noAnimations) {
+    if (!aniStyle) { aniStyle = document.createElement('style'); aniStyle.id = 'cce-no-ani'; document.head.appendChild(aniStyle); }
+    aniStyle.textContent = '*,*::before,*::after{animation-duration:0s!important;transition-duration:0s!important;}';
+  } else {
+    aniStyle?.remove();
+  }
+
+  // ── Per-card tweaks ──
   document.querySelectorAll('[data-region="card-deck"] .course-card,.block_recentlyaccessedcourses .course-card').forEach(card => {
     const te = card.querySelector('.coursename,.text-truncate'); if (!te) return;
     const name = extractName(te.textContent.trim()), setting = getSetting(name);
-    if (setting?.color) { card.style.setProperty('border-left', `4px solid ${setting.color}`, 'important'); card.style.setProperty('background', 'rgba(17,24,39,0.5)', 'important'); card.style.setProperty('backdrop-filter', 'blur(12px)', 'important'); }
+
+    // Course color border
+    if (setting?.color) {
+      card.style.setProperty('border-left', `4px solid ${setting.color}`, 'important');
+      card.style.setProperty('background', 'rgba(17,24,39,0.5)', 'important');
+      card.style.setProperty('backdrop-filter', 'blur(12px)', 'important');
+    }
+
+    // Compact cards
+    if (moodleSettings.compactCards) {
+      card.style.setProperty('min-height', '0', 'important');
+      const img = card.querySelector('.card-img-top');
+      if (img) img.style.setProperty('height', '60px', 'important');
+    } else {
+      card.style.removeProperty('min-height');
+      const img = card.querySelector('.card-img-top');
+      if (img && !moodleSettings.hideBanners) img.style.removeProperty('height');
+    }
+
+    // Hide banners
+    const img = card.querySelector('.card-img-top');
+    if (img) img.style.display = moodleSettings.hideBanners ? 'none' : '';
+
+    // Course category (.text-muted inside .course-info-container)
+    const cat = card.querySelector('.text-muted,.muted');
+    if (cat) cat.style.display = moodleSettings.showCourseCategory === false ? 'none' : '';
+
+    // Favourite icon
+    const fav = card.querySelector('[data-region="favourite-icon"]');
+    if (fav) fav.style.display = moodleSettings.showFavourite === false ? 'none' : '';
   });
+
+  // ── Pagination ──
+  hide('[data-region="paging-bar-container"],.paging-bar-container', moodleSettings.showPagination === false);
 }
 
 // ── Next Course Timeline ──
