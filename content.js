@@ -186,6 +186,12 @@ function applyPortalHides() {
   hide('.sidebar, #sidebar, .aside', portalSettings.hideSidebar);
   // Always hide <hr> on Portal — they leave ugly white lines
   document.querySelectorAll('hr').forEach(hr => hr.style.setProperty('display', 'none', 'important'));
+  // Move #section-plannings (Horaires) above #section-bookmarks (Liens)
+  const plannings = document.getElementById('section-plannings');
+  const bookmarks = document.getElementById('section-bookmarks');
+  if (plannings && bookmarks && bookmarks.parentNode && plannings !== bookmarks.previousElementSibling) {
+    bookmarks.parentNode.insertBefore(plannings, bookmarks);
+  }
 }
 
 
