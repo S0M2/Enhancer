@@ -91,6 +91,12 @@ function loadData() {
       hideNavbar: p.hideNavbar ?? false,
       hideFooter: p.hideFooter ?? false,
       hideSidebar: p.hideSidebar ?? false,
+      showBkmPedagogic: p.showBkmPedagogic ?? true,
+      showBkmInfos: p.showBkmInfos ?? true,
+      showBkmTools: p.showBkmTools ?? true,
+      showBkmDepartment: p.showBkmDepartment ?? true,
+      showBkmCloud: p.showBkmCloud ?? true,
+      showBkmPersonal: p.showBkmPersonal ?? true,
     };
 
     syncUI();
@@ -132,6 +138,12 @@ function syncUI() {
   setVal('portalHideNavbar', portalSettings.hideNavbar);
   setVal('portalHideFooter', portalSettings.hideFooter);
   setVal('portalHideSidebar', portalSettings.hideSidebar);
+  setVal('showBkmPedagogic', portalSettings.showBkmPedagogic);
+  setVal('showBkmInfos', portalSettings.showBkmInfos);
+  setVal('showBkmTools', portalSettings.showBkmTools);
+  setVal('showBkmDepartment', portalSettings.showBkmDepartment);
+  setVal('showBkmCloud', portalSettings.showBkmCloud);
+  setVal('showBkmPersonal', portalSettings.showBkmPersonal);
   setActiveThemeBtn(portalSettings.theme);
 }
 
@@ -442,6 +454,12 @@ function bindPortalControls() {
     portalHideNavbar: 'hideNavbar',
     portalHideFooter: 'hideFooter',
     portalHideSidebar: 'hideSidebar',
+    showBkmPedagogic: 'showBkmPedagogic',
+    showBkmInfos: 'showBkmInfos',
+    showBkmTools: 'showBkmTools',
+    showBkmDepartment: 'showBkmDepartment',
+    showBkmCloud: 'showBkmCloud',
+    showBkmPersonal: 'showBkmPersonal',
   };
   Object.entries(hideMap).forEach(([id, key]) => {
     document.getElementById(id)?.addEventListener('change', e => {

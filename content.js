@@ -184,6 +184,15 @@ function applyPortalHides() {
   hide('.navbar, #navbar, header.navbar', portalSettings.hideNavbar);
   hide('footer, #footer, .footer', portalSettings.hideFooter);
   hide('.sidebar, #sidebar, .aside', portalSettings.hideSidebar);
+
+  // Link categories visibility
+  if (portalSettings.showBkmPedagogic === false) hide('.bookmark--pedagogic', true);
+  if (portalSettings.showBkmInfos === false) hide('.bookmark--infos', true);
+  if (portalSettings.showBkmTools === false) hide('.bookmark--tools', true);
+  if (portalSettings.showBkmDepartment === false) hide('.bookmark--department', true);
+  if (portalSettings.showBkmCloud === false) hide('.bookmark--cloud', true);
+  if (portalSettings.showBkmPersonal === false) hide('.bookmark--personal', true);
+
   // Always hide <hr> on Portal — they leave ugly white lines
   document.querySelectorAll('hr').forEach(hr => hr.style.setProperty('display', 'none', 'important'));
   // Move #section-plannings (Horaires) above #section-bookmarks (Liens)
@@ -357,7 +366,7 @@ input::placeholder, textarea::placeholder { color: var(--pd-muted) !important; o
   border-color: var(--pd-acc) !important;
   box-shadow: 0 2px 10px var(--pd-glow) !important;
 }
-.btn-primary:hover { box-shadow: 0 4px 18px rgba(${accStr},.4) !important; transform: translateY(-1px); }
+.btn-primary:hover { box-shadow: 0 4px 18px rgba(var(--pd-acc-rgb),.4) !important; transform: translateY(-1px); }
 .btn-secondary, .btn-outline-secondary {
   background: var(--pd-bg3) !important;
   border-color: var(--pd-border) !important;
@@ -369,6 +378,37 @@ input::placeholder, textarea::placeholder { color: var(--pd-muted) !important; o
 /* Links */
 a { color: var(--pd-acc) !important; }
 a:hover { color: #fff !important; }
+
+/* ── Portal Bookmarks (Liens) Customization ── */
+.bookmark {
+  background: var(--pd-bg2) !important;
+  border: 1px solid var(--pd-border) !important;
+  border-left: 4px solid var(--pd-acc) !important; /* Customizable left bar */
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3) !important;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+}
+.bookmark:hover {
+  transform: translateY(-3px) scale(1.01) !important;
+  box-shadow: 0 8px 25px rgba(var(--pd-acc-rgb), 0.25) !important;
+  border-left-width: 6px !important;
+  background: var(--pd-bg3) !important;
+}
+.bookmark-title {
+  color: var(--pd-text) !important;
+  font-weight: 700 !important;
+  transition: color 0.2s !important;
+}
+.bookmark:hover .bookmark-title {
+  color: var(--pd-acc) !important;
+}
+.bookmark-actions a i {
+  color: var(--pd-muted) !important;
+  transition: color 0.2s !important;
+}
+.bookmark-actions a:hover i {
+  color: var(--pd-acc) !important;
+}
+
 
 /* Sidebar / drawers */
 .drawer, [data-region="drawer"], .block-region,
