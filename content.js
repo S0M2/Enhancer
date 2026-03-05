@@ -6,7 +6,7 @@ function addH(el, h) { const dp = new DOMParser().parseFromString(h, 'text/html'
 const isMoodle = location.hostname.includes('moodle.henallux.be');
 const isPortal = location.hostname.includes('portail.henallux.be');
 const isAgenda = isPortal && location.search.includes('mod=horaire');
-const isHome = isPortal &&!location.search.includes('mod=');
+const isHome = isPortal && !location.search.includes('mod=');
 
 let enabled = true, courseSettings = {}, moodleSettings = {}, portalSettings = {}, customCSS = {};
 let knownCourses = new Set(), currentView = 'list';
@@ -18,20 +18,20 @@ function debounce(fn, ms) {
   return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
 }
 
-const defMoodle = () => ({ dark:true, accentColor:'#6366f1', compactCards:false, hideBanners:false, noAnimations:false, timeline:true, calendar:true, recent:true, showNextTimeline:true, hideNavbar:false, hideSidebar:false, hidePageHeader:false, hideNotifs:false, hideEditMode:false, hideFooter:false, showCourseCategory:true, showFavourite:true, showPagination:true });
+const defMoodle = () => ({ dark: true, accentColor: '#6366f1', compactCards: false, hideBanners: false, noAnimations: false, timeline: true, calendar: true, recent: true, showNextTimeline: true, hideNavbar: false, hideSidebar: false, hidePageHeader: false, hideNotifs: false, hideEditMode: false, hideFooter: false, showCourseCategory: true, showFavourite: true, showPagination: true });
 
-const defPortal = () => ({ theme:'default', accentColor:'#6366f1', hideNavbar:false, hideFooter:false, hideSidebar:false, cleanSlate:true });
+const defPortal = () => ({ theme: 'default', accentColor: '#6366f1', hideNavbar: false, hideFooter: false, hideSidebar: false, cleanSlate: true });
 
 function normPS(s) {
   const d = defPortal();
   if (!s) return d;
   return {
-    theme:s.theme || d.theme,
-    accentColor:s.accentColor || d.accentColor,
-    hideNavbar:s.hideNavbar ?? d.hideNavbar,
-    hideFooter:s.hideFooter ?? d.hideFooter,
-    hideSidebar:s.hideSidebar ?? d.hideSidebar,
-    cleanSlate:s.cleanSlate ?? d.cleanSlate,
+    theme: s.theme || d.theme,
+    accentColor: s.accentColor || d.accentColor,
+    hideNavbar: s.hideNavbar ?? d.hideNavbar,
+    hideFooter: s.hideFooter ?? d.hideFooter,
+    hideSidebar: s.hideSidebar ?? d.hideSidebar,
+    cleanSlate: s.cleanSlate ?? d.cleanSlate,
   };
 }
 
@@ -42,7 +42,7 @@ chrome.storage.local.get(['courseSettings', 'knownCourses', 'moodleSettings', 'p
   moodleSettings = normMS(res.moodleSettings);
   portalSettings = normPS(res.portalSettings);
   customCSS = res.customCSS || {};
-  enabled = res.extensionEnabled!== false;
+  enabled = res.extensionEnabled !== false;
   replaceLogo();
   if (!enabled) return;
   if (isMoodle) initMoodle();
@@ -58,9 +58,9 @@ chrome.storage.local.get(['courseSettings', 'knownCourses', 'moodleSettings', 'p
 });
 
 chrome.storage.onChanged.addListener((changes, ns) => {
-  if (ns!== 'local') return;
+  if (ns !== 'local') return;
   if (changes.knownCourses?.newValue) changes.knownCourses.newValue.forEach(c => knownCourses.add(c));
-  if (changes.courseSettings?.newValue) { courseSettings = changes.courseSettings.newValue; if (enabled) isMoodle ? applyMoodleStyle():scheduleRefresh(300); }
+  if (changes.courseSettings?.newValue) { courseSettings = changes.courseSettings.newValue; if (enabled) isMoodle ? applyMoodleStyle() : scheduleRefresh(300); }
   if (changes.moodleSettings?.newValue) { moodleSettings = normMS(changes.moodleSettings.newValue); if (enabled && isMoodle) applyMoodleStyle(); }
   if (changes.portalSettings?.newValue) { portalSettings = normPS(changes.portalSettings.newValue); if (enabled && isPortal) applyPortalTheme(); }
   if (changes.customCSS?.newValue) { customCSS = changes.customCSS.newValue; applyCustomCSS(); }
@@ -72,13 +72,13 @@ chrome.storage.onChanged.addListener((changes, ns) => {
 });
 
 chrome.runtime.onMessage.addListener((msg, _s, reply) => {
-  if (msg.action === 'get_courses') { reply({ courses:collectCourses() }); return true; }
+  if (msg.action === 'get_courses') { reply({ courses: collectCourses() }); return true; }
   if (msg.action === 'apply_settings') {
     courseSettings = msg.settings;
     if (msg.moodleSettings) moodleSettings = normMS(msg.moodleSettings);
     if (msg.portalSettings) portalSettings = normPS(msg.portalSettings);
     if (msg.customCSS) customCSS = msg.customCSS;
-    if (enabled) { isMoodle ? applyMoodleStyle():scheduleRefresh(300); if (isPortal) applyPortalTheme(); applyCustomCSS(); }
+    if (enabled) { isMoodle ? applyMoodleStyle() : scheduleRefresh(300); if (isPortal) applyPortalTheme(); applyCustomCSS(); }
     return true;
   }
   if (msg.action === 'set_enabled') { setEnabled(msg.enabled); return true; }
@@ -89,24 +89,24 @@ function normMS(s) {
   const d = defMoodle();
   if (!s) return d;
   return {
-    dark:s.darkEnabled ?? s.dark ?? d.dark,
-    accentColor:s.accentColor || d.accentColor,
-    compactCards:s.compactCards ?? d.compactCards,
-    hideBanners:s.hideBanners ?? d.hideBanners,
-    noAnimations:s.noAnimations ?? d.noAnimations,
-    timeline:s.showTimeline ?? s.timeline ?? d.timeline,
-    calendar:s.showCalendar ?? s.calendar ?? d.calendar,
-    recent:s.showRecent ?? s.recent ?? d.recent,
-    showNextTimeline:s.showNextTimeline ?? d.showNextTimeline,
-    hideNavbar:s.hideNavbar ?? d.hideNavbar,
-    hideSidebar:s.hideSidebar ?? d.hideSidebar,
-    hidePageHeader:s.hidePageHeader ?? d.hidePageHeader,
-    hideNotifs:s.hideNotifs ?? d.hideNotifs,
-    hideEditMode:s.hideEditMode ?? d.hideEditMode,
-    hideFooter:s.hideFooter ?? d.hideFooter,
-    showCourseCategory:s.showCourseCategory!== false,
-    showFavourite:s.showFavourite!== false,
-    showPagination:s.showPagination!== false,
+    dark: s.darkEnabled ?? s.dark ?? d.dark,
+    accentColor: s.accentColor || d.accentColor,
+    compactCards: s.compactCards ?? d.compactCards,
+    hideBanners: s.hideBanners ?? d.hideBanners,
+    noAnimations: s.noAnimations ?? d.noAnimations,
+    timeline: s.showTimeline ?? s.timeline ?? d.timeline,
+    calendar: s.showCalendar ?? s.calendar ?? d.calendar,
+    recent: s.showRecent ?? s.recent ?? d.recent,
+    showNextTimeline: s.showNextTimeline ?? d.showNextTimeline,
+    hideNavbar: s.hideNavbar ?? d.hideNavbar,
+    hideSidebar: s.hideSidebar ?? d.hideSidebar,
+    hidePageHeader: s.hidePageHeader ?? d.hidePageHeader,
+    hideNotifs: s.hideNotifs ?? d.hideNotifs,
+    hideEditMode: s.hideEditMode ?? d.hideEditMode,
+    hideFooter: s.hideFooter ?? d.hideFooter,
+    showCourseCategory: s.showCourseCategory !== false,
+    showFavourite: s.showFavourite !== false,
+    showPagination: s.showPagination !== false,
   };
 }
 
@@ -116,7 +116,7 @@ function setEnabled(val) {
   if (val) {
     replaceLogo(); applyCustomCSS();
     if (isMoodle) initMoodle();
-    else if (isAgenda) fcReady ? refreshAgenda():waitForFC();
+    else if (isAgenda) fcReady ? refreshAgenda() : waitForFC();
     else if (isHome) initHome();
   } else {
     [agendaObserver, moodleObserver, fcObserver].forEach(o => o?.disconnect());
@@ -136,7 +136,7 @@ function replaceLogo() {
   const logo = document.getElementById('logo') || document.querySelector('.site-name img');
   if (!logo) return;
   logo.src = chrome.runtime.getURL('icons/icon128.png'); logo.srcset = '';
-  Object.entries({ width:'42px', height:'42px', 'min-width':'42px', 'min-height':'42px', 'max-width':'42px', 'max-height':'42px', 'border-radius':'50%', 'object-fit':'cover', 'border':'2px solid rgba(255,255,255,0.2)', 'box-shadow':'0 2px 8px rgba(0,0,0,0.4)', display:'block' })
+  Object.entries({ width: '42px', height: '42px', 'min-width': '42px', 'min-height': '42px', 'max-width': '42px', 'max-height': '42px', 'border-radius': '50%', 'object-fit': 'cover', 'border': '2px solid rgba(255,255,255,0.2)', 'box-shadow': '0 2px 8px rgba(0,0,0,0.4)', display: 'block' })
     .forEach(([k, v]) => logo.style.setProperty(k, v, 'important'));
 }
 
@@ -169,7 +169,7 @@ function applyPortalTheme() {
 
   const acc = accent;
   const accRgb = hexToRgb(acc);
-  const accStr = accRgb ? `${accRgb.r},${accRgb.g},${accRgb.b}`:'99,102,241';
+  const accStr = accRgb ? `${accRgb.r},${accRgb.g},${accRgb.b}` : '99,102,241';
 
   if (theme === 'dark') {
     document.body.classList.add('cce-portal-dark');
@@ -184,7 +184,7 @@ function applyPortalTheme() {
 }
 
 function applyPortalHides() {
-  const hide = (sel, flag) => document.querySelectorAll(sel).forEach(el => el.style.setProperty('display', flag ? 'none':'', 'important'));
+  const hide = (sel, flag) => document.querySelectorAll(sel).forEach(el => el.style.setProperty('display', flag ? 'none' : '', 'important'));
   hide('.navbar, #navbar, header.navbar', portalSettings.hideNavbar);
   hide('footer, #footer, .footer', portalSettings.hideFooter);
   hide('.sidebar, #sidebar, .aside', portalSettings.hideSidebar);
@@ -202,7 +202,7 @@ function applyPortalHides() {
   // Move #section-plannings (Horaires) above #section-bookmarks (Liens)
   const plannings = document.getElementById('section-plannings');
   const bookmarks = document.getElementById('section-bookmarks');
-  if (plannings && bookmarks && bookmarks.parentNode && plannings!== bookmarks.previousElementSibling) {
+  if (plannings && bookmarks && bookmarks.parentNode && plannings !== bookmarks.previousElementSibling) {
     bookmarks.parentNode.insertBefore(plannings, bookmarks);
   }
 
@@ -211,7 +211,7 @@ function applyPortalHides() {
   if (annSection) {
     const header = annSection.querySelector('header .heading-title-tools');
     const content = annSection.querySelector('#announcements');
-    if (header && content &&!header.dataset.cceCollapsible) {
+    if (header && content && !header.dataset.cceCollapsible) {
       header.dataset.cceCollapsible = 'true';
       header.style.cursor = 'pointer';
       header.title = 'Cliquer pour réduire / agrandir';
@@ -261,7 +261,7 @@ function applyPortalHides() {
 function hexToRgb(hex) {
   const m = hex.replace('#', '').match(/.{2}/g);
   if (!m || m.length < 3) return null;
-  return { r:parseInt(m[0], 16), g:parseInt(m[1], 16), b:parseInt(m[2], 16) };
+  return { r: parseInt(m[0], 16), g: parseInt(m[1], 16), b: parseInt(m[2], 16) };
 }
 
 function portalDarkCSS(acc, accStr) {
@@ -615,22 +615,22 @@ function parseTitle(text) {
   s = s.replace(/\[[^\]]+\]/g, m => { regroups.push(m); return ' __G__ '; });
   s = s.replace(/\b([A-Z]{2,4}-)?[A-Z]{2,}-[1-3](B|B-[A-Z])\b/gi, ' __C__ ');
   s = s.replace(/\b\d+\s*pl\b\.?|\b\d+\s*places?\b|\(\d+\s*pl\.\)/gi, '');
-  let parts = s.split(/\s*[-–—*|]\s*/).map(p => p.replace(/__R__|__G__|__C__/g, '').trim()).filter(p => p.length> 0 &&!/^[A-Z0-9\-,.\s]+$/.test(p));
+  let parts = s.split(/\s*[-–—*|]\s*/).map(p => p.replace(/__R__|__G__|__C__/g, '').trim()).filter(p => p.length > 0 && !/^[A-Z0-9\-,.\s]+$/.test(p));
   let name = parts[0] || 'Inconnu', prof = parts[1] || '';
-  if (parts.length> 1 && parts[1].toLowerCase().startsWith(parts[0].toLowerCase())) { name = parts[1]; prof = parts[2] || ''; }
-  else if (name.length < 3 && parts.length> 1) { name = parts[1]; prof = parts[2] || ''; }
+  if (parts.length > 1 && parts[1].toLowerCase().startsWith(parts[0].toLowerCase())) { name = parts[1]; prof = parts[2] || ''; }
+  else if (name.length < 3 && parts.length > 1) { name = parts[1]; prof = parts[2] || ''; }
   if (prof && name.toLowerCase().endsWith(prof.toLowerCase())) name = name.slice(0, name.length-prof.length).trim();
-  if (text.includes('Remédiations') &&!name.includes('Remédiations')) name = 'Remédiations ' + name;
+  if (text.includes('Remédiations') && !name.includes('Remédiations')) name = 'Remédiations ' + name;
   name = name.replace(/\s*[-]?\s*Q[12](\/Q[12])?$/i, '').replace(/\s+[A-Z0-9-]{1,3}$/i, '').replace(/[:\s-]+$/, '').trim();
   if (!year) regroups.forEach(r => { const m = r.match(/\[([1-3])/); if (m) year = 'BAC ' + m[1]; });
   const lo = text.toLowerCase(); let type = 'other';
   if (/\blabo\b|\blaboratoire\b|\btp\b/.test(lo)) type = 'lab';
   else if (/\bautonomie\b/.test(lo)) type = 'auto';
   else if (/\bcours\b|\bthéorie\b|\btheorie\b/.test(lo)) type = 'th';
-  return { name:name.replace(/\s+/g, ' ').trim(), prof:prof.replace(/\s+/g, ' ').trim(), type, room:rooms.join(', '), year };
+  return { name: name.replace(/\s+/g, ' ').trim(), prof: prof.replace(/\s+/g, ' ').trim(), type, room: rooms.join(', '), year };
 }
-function extractName(text) { const p = parseTitle(text); if (!p) return text ? text.slice(0, 30):null; return p.year ? `${p.name} [${p.year}]`:p.name; }
-function isValid(n) { return n && n.length>= 3 &&!/^\d+$/.test(n); }
+function extractName(text) { const p = parseTitle(text); if (!p) return text ? text.slice(0, 30) : null; return p.year ? `${p.name} [${p.year}]` : p.name; }
+function isValid(n) { return n && n.length >= 3 && !/^\d+$/.test(n); }
 function getSetting(name) { if (!name) return null; if (courseSettings[name]) return courseSettings[name]; const c = name.replace(/\s*\[BAC\s*\d\]/i, '').trim(); return courseSettings[c] || null; }
 function getLink(name) { return getSetting(name)?.link || null; }
 
@@ -638,11 +638,11 @@ function collectCourses() {
   if (isMoodle) document.querySelectorAll('.coursename').forEach(el => { const n = extractName((el.innerText || el.textContent).trim()); if (isValid(n)) knownCourses.add(n); });
   else { const fc = document.querySelector('.fc'); if (fc) fc.querySelectorAll('.fc-list-event-title a,.fc-event-title').forEach(el => { const n = extractName(el.textContent.replace(/\s+/g, ' ').trim()); if (isValid(n)) knownCourses.add(n); }); }
 
-  if (knownCourses.size> 0) {
+  if (knownCourses.size > 0) {
     chrome.storage.local.get(['knownCourses'], (res) => {
       const existing = res.knownCourses || [];
       const merged = [...new Set([...existing, ...knownCourses])].sort();
-      chrome.storage.local.set({ knownCourses:merged });
+      chrome.storage.local.set({ knownCourses: merged });
     });
   }
   return [...knownCourses].sort();
@@ -656,14 +656,14 @@ function initMoodle() {
   chrome.storage.local.get(['agendaEvents'], res => { applyMoodleStyle(); buildNextTimeline(res.agendaEvents || []); });
   moodleObserver?.disconnect();
   const _debouncedMoodle = debounce(() => {
-    if (_mutationPaused ||!enabled) return;
+    if (_mutationPaused || !enabled) return;
     chrome.storage.local.get(['agendaEvents'], res => {
       applyMoodleStyle();
       buildNextTimeline(res.agendaEvents || []);
     });
   }, 500);
   moodleObserver = new MutationObserver(_debouncedMoodle);
-  moodleObserver.observe(document.body, { childList:true, subtree:true });
+  moodleObserver.observe(document.body, { childList: true, subtree: true });
 }
 
 function applyMoodleStyle() {
@@ -677,16 +677,16 @@ function applyMoodleStyle() {
   if (moodleSettings.dark) document.body.classList.add('cce-dark'); else document.body.classList.remove('cce-dark');
 
   // ── Visible blocks ──
-  const blockMap = { timeline:moodleSettings.timeline, calendar_month:moodleSettings.calendar, recentlyaccessedcourses:moodleSettings.recent };
-  for (const [k, show] of Object.entries(blockMap)) { const el = document.querySelector(`[data-block="${k}"]`); if (el) el.style.display = show ? '':'none'; }
+  const blockMap = { timeline: moodleSettings.timeline, calendar_month: moodleSettings.calendar, recentlyaccessedcourses: moodleSettings.recent };
+  for (const [k, show] of Object.entries(blockMap)) { const el = document.querySelector(`[data-block="${k}"]`); if (el) el.style.display = show ? '' : 'none'; }
 
   // ── CCE next timeline ──
   const ntEl = document.getElementById('cce-next-timeline');
-  if (ntEl) ntEl.style.display = moodleSettings.showNextTimeline === false ? 'none':'';
+  if (ntEl) ntEl.style.display = moodleSettings.showNextTimeline === false ? 'none' : '';
 
   // ── Helper ──
-  const hide = (sel, flag) => document.querySelectorAll(sel).forEach(el => el.style.display = flag ? 'none':'');
-  const show = (sel, flag) => document.querySelectorAll(sel).forEach(el => el.style.display = flag === false ? 'none':'');
+  const hide = (sel, flag) => document.querySelectorAll(sel).forEach(el => el.style.display = flag ? 'none' : '');
+  const show = (sel, flag) => document.querySelectorAll(sel).forEach(el => el.style.display = flag === false ? 'none' : '');
 
   // ── Hide elements ──
   hide('.navbar.fixed-top, nav.navbar', moodleSettings.hideNavbar);
@@ -730,20 +730,20 @@ function applyMoodleStyle() {
     } else {
       card.style.removeProperty('min-height');
       const img = card.querySelector('.card-img-top');
-      if (img &&!moodleSettings.hideBanners) img.style.removeProperty('height');
+      if (img && !moodleSettings.hideBanners) img.style.removeProperty('height');
     }
 
     // Hide banners
     const img = card.querySelector('.card-img-top');
-    if (img) img.style.display = moodleSettings.hideBanners ? 'none':'';
+    if (img) img.style.display = moodleSettings.hideBanners ? 'none' : '';
 
     // Course category (.text-muted inside .course-info-container)
     const cat = card.querySelector('.text-muted,.muted');
-    if (cat) cat.style.display = moodleSettings.showCourseCategory === false ? 'none':'';
+    if (cat) cat.style.display = moodleSettings.showCourseCategory === false ? 'none' : '';
 
     // Favourite icon
     const fav = card.querySelector('[data-region="favourite-icon"]');
-    if (fav) fav.style.display = moodleSettings.showFavourite === false ? 'none':'';
+    if (fav) fav.style.display = moodleSettings.showFavourite === false ? 'none' : '';
   });
 
   // ── Pagination ──
@@ -755,13 +755,13 @@ function buildNextTimeline(events = []) {
   if (!enabled) return;
   document.getElementById('cce-next-timeline')?.remove();
   const now = Date.now(), today = new Date().toLocaleDateString('en-CA');
-  const sorted = [...events].filter(ev => ev.date>= today)
-    .map(ev => ({ ...ev, startMs:+new Date(`${ev.date}T${p2(ev.sh)}:${p2(ev.sm)}:00`), endMs:+new Date(`${ev.date}T${p2(ev.eh)}:${p2(ev.em)}:00`) }))
+  const sorted = [...events].filter(ev => ev.date >= today)
+    .map(ev => ({ ...ev, startMs: +new Date(`${ev.date}T${p2(ev.sh)}:${p2(ev.sm)}:00`), endMs: +new Date(`${ev.date}T${p2(ev.eh)}:${p2(ev.em)}:00`) }))
     .sort((a, b) => a.startMs-b.startMs);
-  const current = sorted.find(ev => ev.startMs <= now && ev.endMs> now);
-  const upcoming = sorted.filter(ev => ev.startMs> now);
-  const nextMs = upcoming[0]?.startMs, nextGroup = nextMs ? upcoming.filter(ev => ev.startMs === nextMs):[];
-  const after = upcoming.filter(ev => ev.startMs> nextMs).slice(0, 5);
+  const current = sorted.find(ev => ev.startMs <= now && ev.endMs > now);
+  const upcoming = sorted.filter(ev => ev.startMs > now);
+  const nextMs = upcoming[0]?.startMs, nextGroup = nextMs ? upcoming.filter(ev => ev.startMs === nextMs) : [];
+  const after = upcoming.filter(ev => ev.startMs > nextMs).slice(0, 5);
   if (nextGroup.length) highlightNextCourses(nextGroup);
 
   let container = document.getElementById('cce-next-timeline');
@@ -781,16 +781,16 @@ function buildNextTimeline(events = []) {
         <div class="cct-body">
           <div class="cct-time">${p2(current.sh)}:${p2(current.sm)} → ${p2(current.eh)}:${p2(current.em)}</div>
           <div class="cct-name">${current.courseName}</div>
-          <div class="cct-meta">📍 ${p.room || '—'}${p.prof ? ' · 👤 ' + p.prof:''}</div>
+          <div class="cct-meta">📍 ${p.room || '—'}${p.prof ? ' · 👤 ' + p.prof : ''}</div>
           <div class="cct-prog"><div class="cct-prog-fill" style="width:${prog}%;background:${color}"></div></div>
         </div>
-        ${link ? `<a href="${link}" target="_blank" class="cct-link">→</a>`:''}
+        ${link ? `<a href="${link}" target="_blank" class="cct-link">→</a>` : ''}
       </div></div>`;
   }
 
   if (nextGroup.length) {
     const d = new Date(nextGroup[0].date + 'T12:00:00'), isToday = nextGroup[0].date === today;
-    const label = isToday ? "Aujourd'hui":cap(d.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long' }));
+    const label = isToday ? "Aujourd'hui" : cap(d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }));
     html += `<div class="cct-section"><div class="cct-lbl cct-next">⏭ PROCHAIN — ${label}</div>
       <div class="cct-group">${nextGroup.map(ev => tCard(ev, true)).join('')}</div></div>`;
   }
@@ -799,9 +799,9 @@ function buildNextTimeline(events = []) {
     html += `<div class="cct-section"><div class="cct-lbl cct-soon">🔜 À VENIR</div><div class="cct-tl">`;
     let ld = null;
     after.forEach(ev => {
-      if (ev.date!== ld) {
+      if (ev.date !== ld) {
         const d = new Date(ev.date + 'T12:00:00'), isT = ev.date === today;
-        html += `<div class="cct-tl-date">${isT ? "Aujourd'hui":cap(d.toLocaleDateString('fr-FR', { weekday:'short', day:'numeric', month:'short' }))}</div>`;
+        html += `<div class="cct-tl-date">${isT ? "Aujourd'hui" : cap(d.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' }))}</div>`;
         ld = ev.date;
       }
       html += tCard(ev, false);
@@ -809,15 +809,15 @@ function buildNextTimeline(events = []) {
     html += `</div></div>`;
   }
 
-  if (!current &&!nextGroup.length) html = `<div class="cct-empty">🎉 <span>Aucun cours à venir — synchronise ton agenda sur le Portail</span></div>`;
+  if (!current && !nextGroup.length) html = `<div class="cct-empty">🎉 <span>Aucun cours à venir — synchronise ton agenda sur le Portail</span></div>`;
   setH(container, `<div class="cct-wrap">${html}</div>`);
 }
 
 function tCard(ev, prom) {
   const p = ev.parsed || {}, color = getSetting(ev.courseName)?.color || 'var(--cce-accent)', link = getLink(ev.courseName);
-  const bm = { th:'cct-bth', lab:'cct-blab', auto:'cct-bauto', other:'cct-bo' };
-  if (prom) return `<div class="cct-card cct-card-next" style="--c:${color}"><div class="cct-bar" style="background:${color}"></div><div class="cct-body"><div class="cct-time">${p2(ev.sh)}:${p2(ev.sm)} → ${p2(ev.eh)}:${p2(ev.em)}</div><div class="cct-name">${ev.courseName}</div><div class="cct-meta">📍 ${p.room || '—'}${p.prof ? ' · 👤 ' + p.prof:''} <span class="cct-badge ${bm[p.type] || 'cct-bo'}">${{ th:'TH', lab:'LAB', auto:'AUTO', other:'—' }[p.type] || '—'}</span></div></div>${link ? `<a href="${link}" target="_blank" class="cct-link cct-link-txt">Ouvrir →</a>`:''}</div>`;
-  return `<div class="cct-tl-row" style="border-left-color:${color}"><span class="cct-tl-t">${p2(ev.sh)}:${p2(ev.sm)}</span><span class="cct-tl-n">${ev.courseName}</span><span class="cct-tl-r">📍 ${p.room || '—'}</span>${link ? `<a href="${link}" target="_blank" class="cct-tl-link">→</a>`:''}</div>`;
+  const bm = { th: 'cct-bth', lab: 'cct-blab', auto: 'cct-bauto', other: 'cct-bo' };
+  if (prom) return `<div class="cct-card cct-card-next" style="--c:${color}"><div class="cct-bar" style="background:${color}"></div><div class="cct-body"><div class="cct-time">${p2(ev.sh)}:${p2(ev.sm)} → ${p2(ev.eh)}:${p2(ev.em)}</div><div class="cct-name">${ev.courseName}</div><div class="cct-meta">📍 ${p.room || '—'}${p.prof ? ' · 👤 ' + p.prof : ''} <span class="cct-badge ${bm[p.type] || 'cct-bo'}">${{ th: 'TH', lab: 'LAB', auto: 'AUTO', other: '—' }[p.type] || '—'}</span></div></div>${link ? `<a href="${link}" target="_blank" class="cct-link cct-link-txt">Ouvrir →</a>` : ''}</div>`;
+  return `<div class="cct-tl-row" style="border-left-color:${color}"><span class="cct-tl-t">${p2(ev.sh)}:${p2(ev.sm)}</span><span class="cct-tl-n">${ev.courseName}</span><span class="cct-tl-r">📍 ${p.room || '—'}</span>${link ? `<a href="${link}" target="_blank" class="cct-tl-link">→</a>` : ''}</div>`;
 }
 
 function highlightNextCourses(evs) {
@@ -843,21 +843,22 @@ function injectMoodleCSS() {
   s.textContent = `
 /* ═══ MOODLE PREMIUM DARK THEME ═══ */
 :root {
- --cce-bg:       #060810;
- --cce-bg1:      #0b0f1a;
- --cce-bg2:      #121826;
- --cce-bg3:      #1a2035;
- --cce-card:     rgba(18,24,38,.6);
- --cce-glass:    rgba(10,14,24,.85);
- --cce-text:     #e2e8f0;
- --cce-text-h:   #f8fafc;
- --cce-muted:    #8b95a5;
- --cce-border:   rgba(255,255,255,.07);
- --cce-accent:   #6366f1;
- --cce-glow:     rgba(99,102,241,.25);
+  --cce-bg: #060810;
+  --cce-bg1: #0b101a;
+  --cce-bg2: #121826;
+  --cce-bg3: #1a2035;
+  --cce-card: rgba(18,24,38,.75);
+  --cce-glass: rgba(10,14,24,.85);
+  --cce-text: #e2e8f0;
+  --cce-text-h: #f8fafc;
+  --cce-muted: #8b95a5;
+  --cce-border: rgba(255,255,255,.08);
+  --cce-accent: #6366f1;
+  --cce-accent-rgb: 99, 102, 241;
+  --cce-glow: rgba(99, 102, 241,.25);
 }
 
-/* Base Body \u0026 Layout */
+/* Base Body & Layout */
 body.cce-dark { background:var(--cce-bg) !important; color:var(--cce-text) !important; }
 body.cce-dark #page-wrapper, body.cce-dark #page, body.cce-dark #region-main,
 body.cce-dark .pagelayout-incourse #page, body.cce-dark .pagelayout-mydashboard #page,
@@ -866,25 +867,30 @@ body.cce-dark #page-content, body.cce-dark.format-tiles #page-content {
   color:var(--cce-text) !important;
 }
 
-/* Activity Items \u0026 Sections */
+/* Activity Items & Sections (Premium Cards) */
 body.cce-dark .section .activity, 
 body.cce-dark .activity-item,
 body.cce-dark .activity-wrapper,
 body.cce-dark .mod-indent-outer {
-  background:var(--cce-bg1) !important;
+  background:var(--cce-card) !important;
+  backdrop-filter: blur(12px) !important;
   border:1px solid var(--cce-border) !important;
-  border-radius:14px !important;
-  margin-bottom:8px !important;
-  padding:12px 16px !important;
-  transition:all 0.2s cubic-bezier(0.16,1,0.3,1) !important;
-  box-shadow:0 4px 12px rgba(0,0,0,.15) !important;
+  border-left: 3px solid var(--cce-accent) !important;
+  border-radius:16px !important;
+  margin-bottom:12px !important;
+  padding:20px !important;
+  transition:all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  box-shadow:0 4px 20px rgba(0,0,0,.2) !important;
 }
+
 body.cce-dark .activity-item:hover {
-  background:rgba(255,255,255,0.03) !important;
-  border-color:rgba(99,102,241,0.3) !important;
-  transform:translateX(4px);
-  box-shadow:0 8px 25px rgba(0,0,0,.3) !important;
+  background:rgba(255,255,255,0.04) !important;
+  border-color:rgba(var(--cce-accent-rgb),0.4) !important;
+  border-left-width: 6px !important;
+  transform: translateX(6px) !important;
+  box-shadow:0 12px 40px rgba(0,0,0,.4) !important;
 }
+
 body.cce-dark .course-content ul.topics li.section, 
 body.cce-dark .course-content ul.weeks li.section {
   background:transparent !important;
@@ -893,52 +899,74 @@ body.cce-dark .course-content ul.weeks li.section {
   border-radius:0 !important;
 }
 
-/* Fix Activities Cards */
-body.cce-dark .course-section .content { background:transparent !important; border:none !important; }
-body.cce-dark .activity.p-3 { background:transparent !important; }
-
 /* Activity Icons Fix */
 body.cce-dark .activityiconcontainer {
-    background-color:rgba(255,255,255,0.05) !important;
-    border-radius:10px !important;
+    background-color:rgba(255,255,255,0.06) !important;
+    border-radius:12px !important;
     border:1px solid var(--cce-border) !important;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.2) !important;
 }
 
-/* Sidebar Toggle \u0026 UI Buttons */
-body.cce-dark .drawer-toggler, body.cce-dark .btn-light {
+/* Sidebar Toggle & UI Buttons */
+body.cce-dark .drawer-toggler, body.cce-dark .btn-light, body.cce-dark .app-drawer-toggle {
     background:var(--cce-bg2) !important;
-    border-color:var(--cce-border) !important;
+    border:1px solid var(--cce-border) !important;
     color:#fff !important;
+    border-radius: 10px !important;
+    padding: 8px 12px !important;
+    transition: all 0.2s !important;
 }
-body.cce-dark .app-drawer-toggle { background:var(--cce-bg2) !important; }
 
-/* Dashboard \u0026 Cards */
+body.cce-dark .drawer-toggler:hover, body.cce-dark .btn-light:hover {
+    background:var(--cce-bg1) !important;
+    border-color: var(--cce-accent) !important;
+}
+
+/* Dashboard & Cards */
 body.cce-dark .card, body.cce-dark .bg-white {
     background:var(--cce-bg1) !important;
-    border-color:var(--cce-border) !important;
+    border:1px solid var(--cce-border) !important;
     color:var(--cce-text) !important;
+    border-radius: 16px !important;
 }
 
-/* Navbar */
-body.cce-dark .navbar.fixed-top, body.cce-dark .secondary-navigation, body.cce-dark #page-header {
-    background:rgba(6,8,16,0.95) !important;
-    backdrop-filter:blur(20px) !important;
+/* Navbar (Glass) */
+body.cce-dark .navbar.fixed-top, 
+body.cce-dark .secondary-navigation, 
+body.cce-dark #page-header {
+    background:rgba(6,8,16,0.92) !important;
+    backdrop-filter:blur(24px) !important;
     border-bottom:1px solid var(--cce-border) !important;
+    box-shadow: 0 4px 30px rgba(0,0,0,0.4) !important;
 }
 
 /* Generic Text */
 body.cce-dark h1, body.cce-dark h2, body.cce-dark h3, body.cce-dark h4, body.cce-dark h5, body.cce-dark h6 {
     color:var(--cce-text-h) !important;
+    letter-spacing: -0.02em !important;
 }
 body.cce-dark .text-muted { color:var(--cce-muted) !important; }
 
+/* Custom Scrollbar for Moodle */
+body.cce-dark ::-webkit-scrollbar { width:8px; height:8px; }
+body.cce-dark ::-webkit-scrollbar-track { background: var(--cce-bg); }
+body.cce-dark ::-webkit-scrollbar-thumb { background: var(--cce-bg3); border-radius: 10px; border: 2px solid var(--cce-bg); }
+body.cce-dark ::-webkit-scrollbar-thumb:hover { background: var(--cce-accent); }
+
+/* Tables */
+body.cce-dark .generaltable { background: transparent !important; color: var(--cce-text) !important; }
+body.cce-dark .generaltable thead th { background: var(--cce-bg2) !important; color: var(--cce-text-h) !important; border-bottom: 2px solid var(--cce-border) !important; }
+body.cce-dark .generaltable tbody td { background: var(--cce-card) !important; border-top: 1px solid var(--cce-border) !important; }
+
 /* Additional Fixes */
 body.cce-dark .bg-light, body.cce-dark .bg-gray, 
-body.cce-dark .generaltable tbody tr:hover, 
+body.cce-dark .generaltable tbody tr:hover td, 
 body.cce-dark .tertiary-navigation {
-  background-color:transparent !important;
+  background-color:rgba(255,255,255,0.02) !important;
 }
-body.cce-dark.border-bottom, body.cce-dark .border-bottom { border-color:var(--cce-border) !important; }
+`;
+  document.head.appendChild(s);
+}
 `;
   document.head.appendChild(s);
 }
@@ -989,7 +1017,7 @@ function waitForFC() {
 function initAgendaPage() {
   if (fcReady) return; fcReady = true; syncFCView();
   setTimeout(() => {
-    if (!enabled) return; injectCSS(); hideFC(); buildShell(); refreshAgenda();
+    if (!enabled) return; injectDashboardCSS(); hideFC(); buildShell(); refreshAgenda();
     // Replace MutationObserver with 10-minute interval to avoid scroll-breaking re-renders
     agendaObserver?.disconnect(); agendaObserver = null;
     clearInterval(agendaInterval);
@@ -1020,7 +1048,7 @@ function readFCEvents() {
 function readFCTitle() { return document.querySelector('.fc .fc-toolbar-title')?.textContent.trim() || ''; }
 function hideFC() { const fc = document.querySelector('.fc'); if (fc) { _mutationPaused = true; fc.style.cssText = 'position:fixed!important;top:-20000px!important;left:-20000px!important;opacity:0!important;pointer-events:none!important;width:100%!important;'; requestAnimationFrame(() => { _mutationPaused = false; }); } }
 function syncFCView() { const fc = document.querySelector('.fc'); if (!fc) return; let t = '.fc-listWeek-button'; if (currentView === 'month') t = fc.querySelector('.fc-dayGridMonth-button') ? '.fc-dayGridMonth-button':'.fc-listMonth-button'; else if (!fc.querySelector('.fc-listWeek-button') && fc.querySelector('.fc-timeGridWeek-button')) t = '.fc-timeGridWeek-button'; const btn = fc.querySelector(t); if (btn &&!btn.classList.contains('fc-button-active')) btn.click(); }
-function navFC(action) { const btn = document.querySelector(`.fc.fc-${ action }-button`); if (btn) { btn.click(); scheduleRefresh(350); } }
+function navFC(action) { const btn = document.querySelector(`.fc.fc-${ action } -button`); if (btn) { btn.click(); scheduleRefresh(350); } }
 function syncFromFC() { const events = readFCEvents(); if (!events.length) return; const title = readFCTitle(); const h = hash(JSON.stringify(events) + title); if (h === lastFCHash) return; lastFCHash = h; persistAgenda(events); }
 function persistAgenda(events) { if (!events.length) return; const h = hash(JSON.stringify(events)); if (h === lastPersistHash) return; lastPersistHash = h; const today = new Date().toLocaleDateString('en-CA'); const ts = [...new Set(events.filter(e => e.date === today).map(e => e.courseName).filter(isValid))]; chrome.storage.local.set({ todayCourses:ts, agendaEvents:events }); }
 
@@ -1028,7 +1056,7 @@ function persistAgenda(events) { if (!events.length) return; const h = hash(JSON
 function buildShell(mt = null) {
   if (document.getElementById('cce-agenda')) return;
   const fc = document.querySelector('.fc'), shell = document.createElement('div'); shell.id = 'cce-agenda';
-  setH(shell, ` <div class="cce-bar"><div class="cce-bar-nav"><button class="cce-btn cce-ico" id="cce-prev">‹</button><button class="cce-btn cce-today-btn" id="cce-today">Aujourd'hui</button><button class="cce-btn cce-ico" id="cce-next">›</button></div><h2 class="cce-bar-title" id="cce-title"></h2><div class="cce-views"><button class="cce-vbtn active" data-view="list">☰</button><button class="cce-vbtn" data-view="week">▦</button><button class="cce-vbtn" data-view="month">📅</button></div></div><div id="cce-banner"></div><div id="cce-events"></div>`);
+  setH(shell, `<div class="cce-bar" ><div class="cce-bar-nav"><button class="cce-btn cce-ico" id="cce-prev">‹</button><button class="cce-btn cce-today-btn" id="cce-today">Aujourd'hui</button><button class="cce-btn cce-ico" id="cce-next">›</button></div><h2 class="cce-bar-title" id="cce-title"></h2><div class="cce-views"><button class="cce-vbtn active" data-view="list">☰</button><button class="cce-vbtn" data-view="week">▦</button><button class="cce-vbtn" data-view="month">📅</button></div></div><div id="cce-banner"></div><div id="cce-events"></div>`);
   if (mt) mt.appendChild(shell); else if (fc?.parentNode) fc.parentNode.insertBefore(shell, fc); else document.body.appendChild(shell);
   document.getElementById('cce-prev').onclick = () => navFC('prev'); document.getElementById('cce-next').onclick = () => navFC('next'); document.getElementById('cce-today').onclick = () => navFC('today');
   shell.querySelectorAll('.cce-vbtn').forEach(btn => btn.onclick = () => { if (btn.dataset.view === currentView) return; currentView = btn.dataset.view; shell.querySelectorAll('.cce-vbtn').forEach(b => b.classList.toggle('active', b === btn)); syncFCView(); scheduleRefresh(80); });
@@ -1052,7 +1080,7 @@ function mBC(ev, label, cls) {
   if (!ev) { const e = document.createElement('div'); e.className = 'cce-bc-empty'; e.textContent = 'Aucun cours'; card.appendChild(e); return card; }
   const p = ev.parsed || {}, t = `${ p2(ev.sh) }:${ p2(ev.sm) } – ${ p2(ev.eh) }:${ p2(ev.em) } `;
   const n = document.createElement('div'); n.className = 'cce-bc-name'; n.appendChild(mkBadge(p.type)); n.appendChild(document.createTextNode(' ' + ev.courseName)); card.appendChild(n);
-  const m = document.createElement('div'); m.className = 'cce-bc-meta'; setH(m, `<span>🕐 ${ t }</span> <span>📍 ${p.room || '—'}</span>${ p.prof ? `<span>👤 ${p.prof}</span>`:'' } `); card.appendChild(m);
+  const m = document.createElement('div'); m.className = 'cce-bc-meta'; setH(m, `< span >🕐 ${ t }</span> <span>📍 ${p.room || '—'}</span>${ p.prof ? `<span>👤 ${p.prof}</span>` : '' } `); card.appendChild(m);
   if (ev.link) { const a = document.createElement('a'); a.href = ev.link; a.target = '_blank'; a.className = 'cce-bc-link'; a.textContent = '🔗 Ouvrir'; card.appendChild(a); }
   return card;
 }
@@ -1064,15 +1092,15 @@ function buildListView(events) {
   events.forEach(ev => { (gr[ev.date] = gr[ev.date] || []).push(ev); });
   for (const date of Object.keys(gr).sort()) {
     const d = new Date(`${ date } T12:00:00`), iT = date === ts;
-    const dd = document.createElement('div'); dd.className = `cce-day${ iT ? ' is-today':'' } `;
+    const dd = document.createElement('div'); dd.className = `cce-day${ iT ? ' is-today' : '' } `;
     const dh = document.createElement('div'); dh.className = 'cce-day-head';
-    setH(dh, `<span class="cce-day-name"> ${ cap(d.toLocaleDateString('fr-FR', { weekday:'long' })) }</span> ${ iT ? '<span class="cce-today-pill">Aujourd\'hui</span>':'' } <span class="cce-day-date">${d.toLocaleDateString('fr-FR', { day:'numeric', month:'long', year:'numeric' })}</span>`);
+    setH(dh, `< span class="cce-day-name" > ${ cap(d.toLocaleDateString('fr-FR', { weekday: 'long' })) }</span> ${ iT ? '<span class="cce-today-pill">Aujourd\'hui</span>' : '' } <span class="cce-day-date">${d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</span>`);
     dd.appendChild(dh);
     for (const ev of gr[date]) {
       const s = getSetting(ev.courseName), col = s?.color || null, p = ev.parsed || {}, iC = cf.has(ev);
-      const card = document.createElement('div'); card.className = `cce-card${ iC ? ' conflict':'' } `; card.dataset.original = ev.original; card.dataset.dateLabel = d.toLocaleDateString('fr-FR', { day:'numeric', month:'long', year:'numeric' });
+      const card = document.createElement('div'); card.className = `cce-card${ iC ? ' conflict' : '' } `; card.dataset.original = ev.original; card.dataset.dateLabel = d.toLocaleDateString('fr-FR', { day:'numeric', month:'long', year:'numeric' });
       card.style.background = col ? rgba(col, 0.1):'rgba(255,255,255,.025)'; card.style.borderLeft = `3px solid ${ col || 'rgba(255,255,255,.08)' } `;
-      const te = document.createElement('div'); te.className = `cce-time${ iC ? ' conflict':'' } `; te.textContent = (iC ? '⚠ ':'') + ev.timeText;
+      const te = document.createElement('div'); te.className = `cce-time${ iC ? ' conflict' : '' } `; te.textContent = (iC ? '⚠ ':'') + ev.timeText;
       const dot = document.createElement('div'); dot.className = 'cce-dot'; if (col) { dot.style.background = col; dot.style.boxShadow = `0 0 8px ${ rgba(col, 0.4) } `; }
       const body = document.createElement('div'); body.className = 'cce-body'; body.appendChild(mkBadge(p.type));
       if (p.room) { const r = document.createElement('span'); r.className = 'cce-room'; r.textContent = p.room; const sep = document.createElement('span'); sep.className = 'cce-sep'; sep.textContent = '·'; body.appendChild(r); body.appendChild(sep); }
@@ -1098,22 +1126,22 @@ function buildWeekView(events) {
   const now = new Date(), nt = ((now.getHours()-GS) * 60 + now.getMinutes()) * (HPX / 60), sn = now.getHours()>= GS && now.getHours() <GE;
   const wk = document.createElement('div'); wk.className = 'cce-week';
   const hd = document.createElement('div'); hd.className = 'cce-wk-head'; setH(hd, '<div class="cce-wk-gutter"></div>');
-  dates.forEach(d => { const dt = new Date(`${ d } T12:00:00`), iT = d === ts; addH(hd, ` <div class="cce-wk-dh${iT ? ' today':''}"><span class="cce-wk-dn">${cap(dt.toLocaleDateString('fr-FR', { weekday:'short' }))}</span><span class="cce-wk-dd${iT ? ' today-n':''}">${dt.getDate()}</span></div> `); });
+  dates.forEach(d => { const dt = new Date(`${ d } T12:00:00`), iT = d === ts; addH(hd, ` <div class="cce-wk-dh${iT ? ' today':''}" ><span class="cce-wk-dn">${cap(dt.toLocaleDateString('fr-FR', { weekday:'short' }))}</span><span class="cce-wk-dd${iT ? ' today-n':''}">${dt.getDate()}</span></div> `); });
   wk.appendChild(hd); const body = document.createElement('div'); body.className = 'cce-wk-body';
   const times = document.createElement('div'); times.className = 'cce-wk-times';
   for (let h = GS; h <GE; h++) { const l = document.createElement('div'); l.className = 'cce-wt'; l.style.height = `${ HPX } px`; l.textContent = `${ p2(h) }:00`; times.appendChild(l); }
   body.appendChild(times); const grid = document.createElement('div'); grid.className = 'cce-wk-grid'; grid.style.height = `${ gH } px`;
   for (let h = GS; h <GE; h++) { const l = document.createElement('div'); l.className = 'cce-wk-line'; l.style.top = `${ (h-GS) * HPX } px`; grid.appendChild(l); }
   dates.forEach(d => {
-    const iT = d === ts, col = document.createElement('div'); col.className = `cce-wk-col${ iT ? ' today':'' } `;
+    const iT = d === ts, col = document.createElement('div'); col.className = `cce-wk-col${ iT ? ' today' : '' } `;
     if (iT && sn) { const nl = document.createElement('div'); nl.className = 'cce-now'; nl.style.top = `${ nt } px`; setH(nl, '<div class="cce-now-dot"></div>'); col.appendChild(nl); }
     layoutDay(bd[d] || []).forEach(ev => {
       const tm = (ev.sh-GS) * 60 + ev.sm, dm = (ev.eh-ev.sh) * 60 + (ev.em-ev.sm), top = tm * (HPX / 60), height = Math.max(dm * (HPX / 60), 20);
       const color = getSetting(ev.courseName)?.color || '#6366f1', cs = ev._cols || 1, c = ev._col || 0, p = ev.parsed || {};
-      const el = document.createElement('div'); el.className = `cce-we${ cf.has(ev) ? ' conflict':'' } `;
+      const el = document.createElement('div'); el.className = `cce-we${ cf.has(ev) ? ' conflict' : '' } `;
       el.dataset.original = ev.original; el.dataset.dateLabel = new Date(`${ d } T12:00:00`).toLocaleDateString('fr-FR', { day:'numeric', month:'long', year:'numeric' });
-      el.style.cssText = `top:${ top } px; height:${ height } px; left:${ c * 100 / cs }%; width:calc(${ 100 / cs }%-3px); background:${ rgba(color, 0.22) }; border-left:3px solid ${ color } `;
-      setH(el, ` <div class="cce-we-time"> ${ p2(ev.sh) }:${ p2(ev.sm) }–${ p2(ev.eh) }:${ p2(ev.em) }</div> <div class="cce-we-name">${ev.courseName}</div>${ height> 50 ? `<div class="cce-we-room">${p.room || ''}</div>`:'' }${ height> 70 && p.prof ? `<div class="cce-we-prof">${p.prof}</div>`:'' } `);
+      el.style.cssText = `top:${ top } px; height:${ height } px; left:${ c * 100 / cs }%; width: calc(${ 100 / cs } %-3px); background:${ rgba(color, 0.22) }; border-left: 3px solid ${ color } `;
+      setH(el, `<div class="cce-we-time" > ${ p2(ev.sh) }:${ p2(ev.sm) }–${ p2(ev.eh) }:${ p2(ev.em) }</div> <div class="cce-we-name">${ev.courseName}</div>${ height > 50 ? `<div class="cce-we-room">${p.room || ''}</div>` : '' }${ height > 70 && p.prof ? `<div class="cce-we-prof">${p.prof}</div>` : '' } `);
       el.addEventListener('click', () => openModal(el)); col.appendChild(el);
     });
     grid.appendChild(col);
@@ -1128,15 +1156,15 @@ function buildMonthView(events) {
   const first = new Date(y, m, 1); let sd = first.getDay()-1; if (sd <0) sd = 6;
   const days = new Date(y, m + 1, 0).getDate(), bd = {}; events.forEach(ev => { (bd[ev.date] = bd[ev.date] || []).push(ev); });
   const cf = detectConflicts(events), wrap = document.createElement('div'); wrap.className = 'cce-month';
-  setH(wrap, ` <div class="cce-month-lbl"> ${ cap(first.toLocaleDateString('fr-FR', { month:'long', year:'numeric' })) }</div><div class="cce-month-head">${['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map(d => `<div>${d}</div>`).join('')}</div><div class="cce-month-grid" id="cce-mgrid"></div><div class="cce-month-detail" id="cce-mdetail"></div>`);
+  setH(wrap, `<div class="cce-month-lbl" > ${ cap(first.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })) }</div><div class="cce-month-head">${['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map(d => `<div>${d}</div>`).join('')}</div><div class="cce-month-grid" id="cce-mgrid"></div><div class="cce-month-detail" id="cce-mdetail"></div>`);
   ct.appendChild(wrap); const mg = document.getElementById('cce-mgrid');
   for (let i = 0; i <sd; i++) { const e = document.createElement('div'); e.className = 'cce-mc empty'; mg.appendChild(e); }
   for (let day = 1; day <= days; day++) {
-    const ds = `${ y }-${ p2(m + 1) }-${ p2(day) } `, iT = ds === ts, de = bd[ds] || [], hC = de.some(ev => cf.has(ev));
+    const ds = `${ y } -${ p2(m + 1) } -${ p2(day) } `, iT = ds === ts, de = bd[ds] || [], hC = de.some(ev => cf.has(ev));
     const cols = [...new Set(de.map(ev => getSetting(ev.courseName)?.color || '#6366f1'))];
-    const cell = document.createElement('div'); cell.className = `cce-mc${ iT ? ' today':'' }${ de.length ? ' has-evs':'' }${ hC ? ' conflict':'' } `; cell.dataset.date = ds;
-    setH(cell, ` <div class="cce-mc-n${iT ? ' tnow':''}"> ${ day }</div> `);
-    if (cols.length) { const d = document.createElement('div'); d.className = 'cce-mc-dots'; cols.slice(0, 4).forEach(c => { const dot = document.createElement('div'); dot.className = 'cce-mc-dot'; dot.style.cssText = `background:${ c }; box-shadow:0 0 6px ${ rgba(c, 0.5) } `; d.appendChild(dot); }); cell.appendChild(d); }
+    const cell = document.createElement('div'); cell.className = `cce-mc${ iT ? ' today' : '' }${ de.length ? ' has-evs' : '' }${ hC ? ' conflict' : '' } `; cell.dataset.date = ds;
+    setH(cell, `<div class="cce-mc-n${iT ? ' tnow':''}" > ${ day }</div> `);
+    if (cols.length) { const d = document.createElement('div'); d.className = 'cce-mc-dots'; cols.slice(0, 4).forEach(c => { const dot = document.createElement('div'); dot.className = 'cce-mc-dot'; dot.style.cssText = `background:${ c }; box-shadow: 0 0 6px ${ rgba(c, 0.5) } `; d.appendChild(dot); }); cell.appendChild(d); }
     if (de.length) { const cnt = document.createElement('div'); cnt.className = 'cce-mc-cnt'; cnt.textContent = `${ de.length } cours`; cell.appendChild(cnt); }
     if (de.length) {
       cell.addEventListener('click', () => {
@@ -1145,13 +1173,13 @@ function buildMonthView(events) {
         if (ia) { det.textContent = ''; det.dataset.active = ''; return; }
         cell.classList.add('sel'); det.dataset.active = ds;
         const dl = new Date(`${ ds } T12:00:00`), dlabel = dl.toLocaleDateString('fr-FR', { day:'numeric', month:'long', year:'numeric' });
-        setH(det, ` <div class="cce-md-head"><span class="cce-md-day">${cap(dl.toLocaleDateString('fr-FR', { weekday:'long' }))}</span><span class="cce-md-date">${dlabel}</span></div> `);
+        setH(det, `<div class="cce-md-head" ><span class="cce-md-day">${cap(dl.toLocaleDateString('fr-FR', { weekday:'long' }))}</span><span class="cce-md-date">${dlabel}</span></div> `);
         de.forEach(ev => {
           const color = getSetting(ev.courseName)?.color || '#6366f1', p = ev.parsed || {}, iC = cf.has(ev);
-          const card = document.createElement('div'); card.className = `cce-card${ iC ? ' conflict':'' } `; card.dataset.original = ev.original; card.dataset.dateLabel = dlabel;
+          const card = document.createElement('div'); card.className = `cce-card${ iC ? ' conflict' : '' } `; card.dataset.original = ev.original; card.dataset.dateLabel = dlabel;
           card.style.background = rgba(color, 0.1); card.style.borderLeft = `3px solid ${ color } `;
-          const te = document.createElement('div'); te.className = `cce-time${ iC ? ' conflict':'' } `; te.textContent = (iC ? '⚠ ':'') + ev.timeText;
-          const dot = document.createElement('div'); dot.className = 'cce-dot'; dot.style.cssText = `background:${ color }; box-shadow:0 0 8px ${ rgba(color, 0.4) } `;
+          const te = document.createElement('div'); te.className = `cce-time${ iC ? ' conflict' : '' } `; te.textContent = (iC ? '⚠ ':'') + ev.timeText;
+          const dot = document.createElement('div'); dot.className = 'cce-dot'; dot.style.cssText = `background:${ color }; box-shadow: 0 0 8px ${ rgba(color, 0.4) } `;
           const body = document.createElement('div'); body.className = 'cce-body'; body.appendChild(mkBadge(p.type));
           if (p.room) { const r = document.createElement('span'); r.className = 'cce-room'; r.textContent = p.room; const sep = document.createElement('span'); sep.className = 'cce-sep'; sep.textContent = '·'; body.appendChild(r); body.appendChild(sep); }
           const nm = document.createElement('span'); nm.className = 'cce-name'; nm.textContent = ev.courseName; body.appendChild(nm);
@@ -1168,6 +1196,7 @@ function buildMonthView(events) {
   const tot = sd + days, rem = tot% 7; if (rem>0) for (let i = 0; i <7-rem; i++) { const e = document.createElement('div'); e.className = 'cce-mc empty'; mg.appendChild(e); }
 }
 
+// ── Modal & Actions ──
 function openModal(card) {
   const orig = card.dataset.original, dl = card.dataset.dateLabel, p = parseTitle(orig); if (!p) return;
   const name = extractName(orig), link = getLink(name);
@@ -1176,145 +1205,139 @@ function openModal(card) {
   const tl = { th:'📖 Théorie', lab:'🔬 Labo', auto:'📝 Autonomie', other:'📌 Cours' }[p.type] || '📌 Cours';
   const tc = { th:'type-th', lab:'type-lab', auto:'type-auto', other:'type-other' }[p.type] || 'type-other';
   let modal = document.getElementById('cce-modal');
-  if (!modal) { modal = document.createElement('dialog'); modal.id = 'cce-modal'; document.body.appendChild(modal); modal.addEventListener('click', e => { if (e.target === modal) modal.close(); }); }
-  setH(modal, ` <div class="cce-m"><button class="cce-m-x" id="cce-m-close">✕</button><div class="cce-m-hero" style="border-left:4px solid ${color}"><div class="cce-m-room${isDist ? ' dist':''}">${isDist ? '🌐 À distance':(p.room || '—')}</div><div><div class="cce-m-name">${p.name}</div>${p.prof ? `<div class="cce-m-prof">👤 ${p.prof}</div>`:''}</div></div><div class="cce-m-badges"><span class="cce-m-badge ${tc}">${tl}</span></div><div class="cce-m-grid"><div class="cce-m-cell"><span class="cce-m-lbl">📅 Date</span><span class="cce-m-val">${dl}</span></div><div class="cce-m-cell"><span class="cce-m-lbl">🕐 Horaire</span><span class="cce-m-val">${time}</span></div><div class="cce-m-cell wide"><span class="cce-m-lbl">🏫 Salle</span><span class="cce-m-val">${p.room || '—'}</span></div></div>${ link ? `<a href="${link}" target="_blank" class="cce-m-action">🔗 Ouvrir le cours</a>`:`<div class="cce-m-nolink">Aucun lien — ajoutez-le dans l'extension</div>` }</div> `);
-  modal.querySelector('#cce-m-close').onclick = () => modal.close(); modal.showModal();
+  if (!modal) {
+    modal = document.createElement('dialog');
+    modal.id = 'cce-modal';
+    document.body.appendChild(modal);
+    modal.addEventListener('click', e => { if (e.target === modal) modal.close(); });
+  }
+  setH(modal, `<div class="cce-m" >
+    <button class="cce-m-x" id="cce-m-close">✕</button>
+    <div class="cce-m-hero" style="border-left:4px solid ${color}">
+      <div class="cce-m-room${isDist ? ' dist':''}">${isDist ? '🌐 À distance':(p.room || '—')}</div>
+      <div>
+        <div class="cce-m-name">${p.name}</div>
+        ${p.prof ? `<div class="cce-m-prof">👤 ${p.prof}</div>`:''}
+      </div>
+    </div>
+    <div class="cce-m-badges"><span class="cce-m-badge ${tc}">${tl}</span></div>
+    <div class="cce-m-grid">
+      <div class="cce-m-cell"><span class="cce-m-lbl">📅 Date</span><span class="cce-m-val">${dl}</span></div>
+      <div class="cce-m-cell"><span class="cce-m-lbl">🕐 Horaire</span><span class="cce-m-val">${time}</span></div>
+      <div class="cce-m-cell wide"><span class="cce-m-lbl">🏫 Salle</span><span class="cce-m-val">${p.room || '—'}</span></div>
+    </div>
+    ${ link ? `<a href="${link}" target="_blank" class="cce-m-action">🔗 Ouvrir le cours</a>` : `<div class="cce-m-nolink">Aucun lien — ajoutez-le dans l'extension</div>` }
+  </div> `);
+  modal.querySelector('#cce-m-close').onclick = () => modal.close();
+  modal.showModal();
 }
 
 // ─── Helpers ───
 function p2(n) { return String(n).padStart(2, '0'); }
 function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
-function hash(str) { let h = 0x811c9dc5; for (let i = 0; i <str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 0x01000193); } return (h>>> 0).toString(16); }
+function hash(str) { let h = 0x811c9dc5; for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 0x01000193); } return (h >>> 0).toString(16); }
 function rgba(hex, a) { if (!/^#([A-Fa-f0-9]{3,6})$/.test(hex)) return hex; let c = hex.slice(1); if (c.length === 3) c = c.split('').map(x => x + x).join(''); const [r, g, b] = [parseInt(c.slice(0, 2), 16), parseInt(c.slice(2, 4), 16), parseInt(c.slice(4, 6), 16)]; return `rgba(${ r }, ${ g }, ${ b }, ${ a })`; }
 function mkBadge(type) { const b = document.createElement('span'); const m = { th:['TH', 'cce-badge-th'], lab:['LAB', 'cce-badge-lab'], auto:['AUTO', 'cce-badge-auto'] }; const [text, cls] = m[type] || ['—', 'cce-badge-other']; b.className = `cce-badge ${ cls } `; b.textContent = text; return b; }
 
-function injectCSS() {
+function injectDashboardCSS() {
   if (document.getElementById('cce-css')) return;
   const s = document.createElement('style'); s.id = 'cce-css';
   s.textContent = `
+/* ═══ SPA DASHBOARD PREMIUM STYLES ═══ */
 #cce-agenda, #cce-agenda * { box-sizing:border-box }
-#cce-agenda { color:#e2e8f0; font-family:'Sora', 'Inter', system-ui, sans-serif; max-width:1080px; margin:0 auto; padding:24px 16px }
-  .cce-bar { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; gap:12px; flex-wrap:wrap }
-  .cce-bar-nav { display:flex; align-items:center; gap:6px }
-  .cce-btn { background:rgba(255, 255, 255, .06); border:1px solid rgba(255, 255, 255, .08); color:#94a3b8; border-radius:10px; padding:8px 14px; font-size:13px; font-weight:600; cursor:pointer; transition:all .2s; font-family:inherit }
-  .cce-btn:hover { background:rgba(99, 102, 241, .15); color:#c7d2fe; border-color:rgba(99, 102, 241, .3) }
-  .cce-ico { width:36px; padding:8px 0; text-align:center; font-size:17px }
-  .cce-today-btn { background:linear-gradient(135deg, #6366f1, #4f46e5); border-color:#6366f1; color:#fff; box-shadow:0 2px 10px rgba(99, 102, 241, .3) }
-  .cce-today-btn:hover { transform:translateY(-1px); box-shadow:0 4px 18px rgba(99, 102, 241, .45) }
-  .cce-bar-title { font-size:20px; font-weight:800; letter-spacing:-.5px; color:#f1f5f9; margin:0 }
-  .cce-views { display:flex; gap:2px; background:rgba(255, 255, 255, .04); border-radius:10px; padding:3px }
-  .cce-vbtn { background:transparent; border:none; color:#64748b; font-size:14px; padding:6px 12px; border-radius:7px; cursor:pointer; font-family:inherit; transition:all .2s }
-  .cce-vbtn:hover { color:#94a3b8 }
-  .cce-vbtn.active { background:linear-gradient(135deg, #6366f1, #4f46e5); color:#fff; box-shadow:0 2px 8px rgba(99, 102, 241, .3) }
-#cce-banner { display:flex; gap:12px; margin-bottom:28px }
-  .cce-bc { flex:1; background:rgba(255, 255, 255, .025); border:1px solid rgba(255, 255, 255, .06); border-radius:14px; padding:14px 16px; transition:all .25s; min-width:0 }
-  .cce-bc:hover { border-color:rgba(99, 102, 241, .2) }
-  .cce-bc-cur { border-color:rgba(99, 102, 241, .22); background:rgba(99, 102, 241, .04); border-left:3px solid #6366f1 }
-  .cce-bc-nxt { border-color:rgba(139, 92, 246, .15); background:rgba(139, 92, 246, .03); border-left:3px solid #8b5cf6 }
-  .cce-bc-lbl { font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:1.5px; margin-bottom:8px; display:flex; align-items:center; gap:6px }
-  .cce-bc-cur.cce-bc-lbl { color:#818cf8 }
-  .cce-bc-nxt.cce-bc-lbl { color:#a78bfa }
-  .cce-pulse { width:7px; height:7px; background:#6366f1; border-radius:50%; flex-shrink:0; animation:cce-pulse 2s ease-in-out infinite }
-@keyframes cce-pulse { 0%, 100% { opacity:1; box-shadow:0 0 0 0 rgba(99, 102, 241, .5) } 50% { opacity:.5; box-shadow:0 0 0 8px rgba(99, 102, 241, 0) } }
-  .cce-bc-name { font-size:14px; font-weight:700; color:#f1f5f9; margin-bottom:6px; line-height:1.3 }
-  .cce-bc-meta { font-size:11px; color:#94a3b8; display:flex; flex-wrap:wrap; gap:4px 10px; margin-bottom:8px }
-  .cce-bc-link { display:inline-flex; align-items:center; gap:5px; padding:6px 14px; font-size:11px; font-weight:600; color:#fff!important; background:linear-gradient(135deg, #6366f1, #4f46e5); border-radius:7px; text-decoration:none!important; box-shadow:0 2px 8px rgba(99, 102, 241, .2); transition:all .2s }
-  .cce-bc-link:hover { box-shadow:0 4px 18px rgba(99, 102, 241, .4); transform:translateY(-1px) }
-  .cce-bc-empty { color:#334155; font-size:12px; font-style:italic; padding:6px 0 }
-  .cce-day { margin-bottom:20px }
-  .cce-day-head { display:flex; align-items:center; gap:10px; padding:8px 4px 8px 14px; border-bottom:1px solid rgba(255, 255, 255, .06); margin-bottom:8px; position:relative }
-  .cce-day-head::before { content:''; position:absolute; left:0; top:6px; bottom:6px; width:3px; background:linear-gradient(#6366f1, #818cf8); border-radius:2px }
-  .cce-day.is-today.cce-day-head::before { background:linear-gradient(#22c55e, #4ade80); box-shadow:0 0 8px rgba(34, 197, 94, .4) }
-  .cce-day-name { font-size:14px; font-weight:700; color:#f1f5f9 }
-  .cce-day-date { font-size:11px; color:#475569; margin-left:auto }
-  .cce-today-pill { font-size:9px; font-weight:800; color:#4ade80; background:rgba(34, 197, 94, .1); border:1px solid rgba(34, 197, 94, .2); padding:2px 8px; border-radius:20px; text-transform:uppercase }
-  .cce-card { display:flex; align-items:center; gap:12px; padding:11px 14px; border-radius:10px; margin-bottom:4px; cursor:pointer; transition:all .2s; border:1px solid transparent }
-  .cce-card:hover { transform:translateX(4px); box-shadow:0 4px 16px rgba(0, 0, 0, .15); border-color:rgba(99, 102, 241, .15) }
-  .cce-time { min-width:108px; font-size:12px; font-weight:700; font-family:'SF Mono', 'Fira Code', monospace; color:#818cf8; letter-spacing:.3px }
-  .cce-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; background:#6366f1 }
-  .cce-body { flex:1; font-size:12.5px; color:#e2e8f0; display:flex; align-items:center; gap:6px; flex-wrap:wrap }
-  .cce-room { font-weight:700; color:#c7d2fe }.cce-sep { color:#334155 }.cce-name { font-weight:500 }.cce-prof { color:#64748b; font-style:italic }
-  .cce-link { text-decoration:none; font-size:15px; padding:4px 8px; border-radius:6px; transition:all .2s; flex-shrink:0 }
-  .cce-link:hover { background:rgba(99, 102, 241, .12); transform:scale(1.15) }
-  .cce-empty { text-align:center; color:#334155; font-size:13px; padding:60px 0; font-style:italic }
-  .cce-card.conflict { border-color:rgba(239, 68, 68, .3)!important }.cce-time.conflict { color:#ef4444!important; font-weight:800!important }
-  .cce-badge { display:inline-flex; align-items:center; font-size:9px; font-weight:800; letter-spacing:.8px; padding:2px 6px; border-radius:4px; text-transform:uppercase; flex-shrink:0 }
-  .cce-badge-th { background:rgba(59, 130, 246, .2); color:#60a5fa; border:1px solid rgba(59, 130, 246, .25) }
-  .cce-badge-lab { background:rgba(249, 115, 22, .2); color:#fb923c; border:1px solid rgba(249, 115, 22, .25) }
-  .cce-badge-auto { background:rgba(34, 197, 94, .2); color:#4ade80; border:1px solid rgba(34, 197, 94, .25) }
-  .cce-badge-other { background:rgba(139, 92, 246, .2); color:#a78bfa; border:1px solid rgba(139, 92, 246, .25) }
-  .cce-week { border:1px solid rgba(255, 255, 255, .06); border-radius:16px; overflow:hidden; background:rgba(255, 255, 255, .012) }
-  .cce-wk-head { display:flex; border-bottom:1px solid rgba(255, 255, 255, .08); background:rgba(255, 255, 255, .025) }
-  .cce-wk-gutter { width:52px; flex-shrink:0; border-right:1px solid rgba(255, 255, 255, .06) }
-  .cce-wk-dh { flex:1; text-align:center; padding:10px 4px; border-right:1px solid rgba(255, 255, 255, .04); display:flex; flex-direction:column; align-items:center; gap:4px }
-  .cce-wk-dh:last-child { border-right:none }.cce-wk-dh.today { background:rgba(99, 102, 241, .04) }
-  .cce-wk-dn { font-size:10px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:1px }
-  .cce-wk-dd { font-size:17px; font-weight:800; color:#94a3b8; width:34px; height:34px; display:flex; align-items:center; justify-content:center; border-radius:9px }
-  .today-n { background:linear-gradient(135deg, #6366f1, #4f46e5)!important; color:#fff!important; box-shadow:0 2px 10px rgba(99, 102, 241, .3) }
-  .cce-wk-body { display:flex; position:relative; overflow-y:auto; max-height:72vh }
-  .cce-wk-times { width:52px; flex-shrink:0; border-right:1px solid rgba(255, 255, 255, .06) }
-  .cce-wt { height:64px; padding:0 8px; font-size:10px; font-weight:600; color:#475569; font-family:'SF Mono', monospace; display:flex; align-items:flex-start; justify-content:flex-end; transform:translateY(-6px) }
-  .cce-wk-grid { flex:1; display:flex; position:relative }
-  .cce-wk-line { position:absolute; left:0; right:0; height:1px; background:rgba(255, 255, 255, .04); pointer-events:none }
-  .cce-wk-col { flex:1; position:relative; border-right:1px solid rgba(255, 255, 255, .04) }
-  .cce-wk-col:last-child { border-right:none }.cce-wk-col.today { background:rgba(99, 102, 241, .02) }
-  .cce-now { position:absolute; left:0; right:0; height:2px; background:#ef4444; z-index:10; pointer-events:none }
-  .cce-now-dot { position:absolute; left:-4px; top:-4px; width:10px; height:10px; border-radius:50%; background:#ef4444; box-shadow:0 0 8px rgba(239, 68, 68, .5) }
-  .cce-we { position:absolute; border-radius:7px; padding:4px 6px; cursor:pointer; overflow:hidden; z-index:1; transition:all .15s; border:1px solid transparent }
-  .cce-we:hover { z-index:5; transform:scale(1.02); box-shadow:0 4px 14px rgba(0, 0, 0, .3); border-color:rgba(255, 255, 255, .12) }
-  .cce-we.conflict { border-color:rgba(239, 68, 68, .4)!important }
-  .cce-we-time { font-size:10px; font-weight:700; color:rgba(255, 255, 255, .85); font-family:'SF Mono', monospace; margin-bottom:2px }
-  .cce-we-name { font-size:11px; font-weight:700; color:#fff; line-height:1.3; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
-  .cce-we-room { font-size:10px; color:rgba(255, 255, 255, .65); margin-top:2px }
-  .cce-we-prof { font-size:9px; color:rgba(255, 255, 255, .45); font-style:italic }
-  .cce-month { border:1px solid rgba(255, 255, 255, .06); border-radius:16px; overflow:hidden; background:rgba(255, 255, 255, .012) }
-  .cce-month-lbl { text-align:center; font-size:16px; font-weight:800; color:#f1f5f9; padding:14px 0 6px; letter-spacing:-.3px }
-  .cce-month-head { display:grid; grid-template-columns:repeat(7, 1fr); border-bottom:1px solid rgba(255, 255, 255, .08); background:rgba(255, 255, 255, .025) }
-  .cce-month-head div { text-align:center; padding:8px 0; font-size:10px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:1px }
-  .cce-month-grid { display:grid; grid-template-columns:repeat(7, 1fr) }
-  .cce-mc { min-height:72px; border-right:1px solid rgba(255, 255, 255, .04); border-bottom:1px solid rgba(255, 255, 255, .04); padding:6px; display:flex; flex-direction:column; gap:3px; transition:all .18s; position:relative }
-  .cce-mc:nth-child(7n) { border-right:none }.cce-mc.empty { background:rgba(0, 0, 0, .08); cursor:default }
-  .cce-mc.has-evs { cursor:pointer }.cce-mc.has-evs:hover { background:rgba(99, 102, 241, .06) }
-  .cce-mc.today { background:rgba(99, 102, 241, .05) }.cce-mc.sel { background:rgba(99, 102, 241, .1)!important; box-shadow:inset 0 0 0 2px rgba(99, 102, 241, .35) }
-  .cce-mc.conflict { box-shadow:inset 0-2px 0 0 rgba(239, 68, 68, .5) }
-  .cce-mc-n { font-size:13px; font-weight:700; color:#94a3b8; width:26px; height:26px; display:flex; align-items:center; justify-content:center; border-radius:7px }
-  .tnow { background:linear-gradient(135deg, #6366f1, #4f46e5)!important; color:#fff!important; box-shadow:0 2px 8px rgba(99, 102, 241, .3) }
-  .cce-mc-dots { display:flex; gap:3px; flex-wrap:wrap }.cce-mc-dot { width:7px; height:7px; border-radius:50% }
-  .cce-mc-cnt { font-size:9px; font-weight:600; color:#64748b; margin-top:auto }
-  .cce-month-detail { padding:0; overflow:hidden; transition:all .3s ease }
-  .cce-month-detail:not(:empty) { padding:14px; border-top:1px solid rgba(99, 102, 241, .15); background:rgba(99, 102, 241, .02) }
-  .cce-md-head { display:flex; align-items:center; gap:10px; margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid rgba(255, 255, 255, .06) }
-  .cce-md-day { font-size:14px; font-weight:700; color:#f1f5f9 }.cce-md-date { font-size:11px; color:#64748b; margin-left:auto }
-#cce-modal { border:none; background:transparent; padding:0; max-width:500px; width:90vw }
-#cce-modal::backdrop { background:rgba(0, 0, 0, .65); backdrop-filter:blur(5px) }
-  .cce-m { background:linear-gradient(140deg, #0d1424, #1a2035); border:1px solid rgba(99, 102, 241, .2); border-radius:18px; padding:22px; position:relative; box-shadow:0 30px 70px rgba(0, 0, 0, .6); color:#e2e8f0 }
-  .cce-m-x { position:absolute; top:14px; right:14px; background:rgba(255, 255, 255, .06); border:1px solid rgba(255, 255, 255, .1); color:#94a3b8; width:30px; height:30px; border-radius:8px; font-size:13px; cursor:pointer; transition:all .2s; display:flex; align-items:center; justify-content:center }
-  .cce-m-x:hover { background:rgba(239, 68, 68, .2); color:#f87171; border-color:rgba(239, 68, 68, .3) }
-  .cce-m-hero { display:flex; align-items:center; gap:14px; margin-bottom:14px; padding:14px; background:rgba(255, 255, 255, .025); border-radius:12px }
-  .cce-m-room { font-size:13px; font-weight:800; color:#a5b4fc; min-width:80px }.cce-m-room.dist { color:#38bdf8 }
-  .cce-m-name { font-size:16px; font-weight:700; color:#f1f5f9; margin-bottom:3px }.cce-m-prof { font-size:12px; color:#94a3b8; font-style:italic }
-  .cce-m-badges { display:flex; gap:6px; margin-bottom:14px; flex-wrap:wrap }
-  .cce-m-badge { font-size:10px; font-weight:700; padding:4px 10px; border-radius:6px; letter-spacing:.5px; text-transform:uppercase }
-  .cce-m-badge.type-th { background:rgba(59, 130, 246, .15); color:#60a5fa; border:1px solid rgba(59, 130, 246, .25) }
-  .cce-m-badge.type-lab { background:rgba(249, 115, 22, .15); color:#fb923c; border:1px solid rgba(249, 115, 22, .25) }
-  .cce-m-badge.type-auto { background:rgba(34, 197, 94, .15); color:#4ade80; border:1px solid rgba(34, 197, 94, .25) }
-  .cce-m-badge.type-other { background:rgba(139, 92, 246, .15); color:#a78bfa; border:1px solid rgba(139, 92, 246, .25) }
-  .cce-m-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:14px }
-  .cce-m-cell { background:rgba(255, 255, 255, .03); border:1px solid rgba(255, 255, 255, .06); border-radius:10px; padding:10px; display:flex; flex-direction:column; gap:3px }
-  .cce-m-cell.wide { grid-column:1 /-1 }
-  .cce-m-lbl { font-size:9px; font-weight:600; text-transform:uppercase; letter-spacing:1px; color:#64748b }
-  .cce-m-val { font-size:13px; font-weight:500; color:#e2e8f0 }
-  .cce-m-action { display:block; width:100%; padding:12px; text-align:center; font-size:13px; font-weight:600; color:#fff!important; background:linear-gradient(135deg, #6366f1, #4f46e5); border-radius:10px; cursor:pointer; text-decoration:none!important; box-shadow:0 2px 10px rgba(99, 102, 241, .2); transition:all .2s }
-  .cce-m-action:hover { box-shadow:0 6px 22px rgba(99, 102, 241, .45); transform:translateY(-1px) }
-  .cce-m-nolink { text-align:center; font-size:11px; color:#334155; font-style:italic; padding:8px }
+#cce-agenda { color: #e2e8f0; font-family: 'Inter', system-ui, sans-serif; max-width: 1140px; margin: 0 auto; padding: 32px 20px; animation: fadeIn 0.4s ease-out; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+.cce-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; gap: 16px; flex-wrap: wrap; background: rgba(255, 255, 255, 0.02); padding: 16px 20px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.05); }
+.cce-bar-nav { display: flex; align-items: center; gap: 8px }
+.cce-btn { background: rgba(255, 255, 255, .05); border: 1px solid rgba(255, 255, 255, .08); color: #94a3b8; border-radius: 12px; padding: 10px 16px; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); font-family: inherit; }
+.cce-btn:hover { background: rgba(99, 102, 241, .15); color: #fff; border-color: rgba(99, 102, 241, .4); transform: translateY(-1px); }
+.cce-ico { width: 40px; padding: 10px 0; text-align: center; font-size: 18px }
+.cce-today-btn { background: linear-gradient(135deg, #6366f1, #4f46e5); border-color: transparent; color: #fff; box-shadow: 0 4px 15px rgba(99, 102, 241, .3); }
+.cce-bar-title { font-size: 22px; font-weight: 800; letter-spacing: -.8px; color: #fff; margin: 0 }
+.cce-views { display: flex; gap: 4px; background: rgba(0, 0, 0, .2); border-radius: 14px; padding: 4px }
+.cce-vbtn { background: transparent; border: none; color: #64748b; font-size: 15px; padding: 8px 14px; border-radius: 10px; cursor: pointer; font-family: inherit; transition: all 0.2s; }
+.cce-vbtn.active { background: rgba(255, 255, 255, 0.08); color: #fff; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); }
+
+#cce-banner { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 34px }
+.cce-bc { background: rgba(255, 255, 255, .03); border: 1px solid rgba(255, 255, 255, .06); border-radius: 18px; padding: 20px 24px; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+.cce-bc:hover { border-color: rgba(99, 102, 241, 0.3); transform: translateY(-3px); background: rgba(255, 255, 255, 0.04); }
+.cce-bc-cur { border-left: 4px solid #6366f1; background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), transparent); }
+.cce-bc-nxt { border-left: 4px solid #8b5cf6; background: linear-gradient(135deg, rgba(139, 92, 246, 0.08), transparent); }
+
+.cce-day { margin-bottom: 30px }
+.cce-day-head { display: flex; align-items: center; gap: 12px; padding: 12px 18px; border-bottom: 1px solid rgba(255, 255, 255, .05); margin-bottom: 16px; background: rgba(255, 255, 255, 0.01); border-radius: 12px 12px 0 0; }
+.cce-day-name { font-size: 16px; font-weight: 800; color: #fff }
+.cce-card { background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 14px; margin-bottom: 6px; padding: 14px 18px; transition: all 0.25s; }
+.cce-card:hover { background: rgba(255, 255, 255, 0.05); border-color: rgba(99, 102, 241, 0.2); transform: translateX(6px); }
+.cce-time { color: #818cf8; font-weight: 800; font-family: 'SF Mono', monospace; min-width: 110px; }
+.cce-room { color: #a5b4fc; font-weight: 800; }
+.cce-name { font-weight: 700; color: #f1f5f9; }
+
+.cce-we-time { font-size: 10px; font-weight: 700; color: rgba(255, 255, 255, .85); font-family: 'SF Mono', monospace; margin-bottom: 2px }
+.cce-we-name { font-size: 11px; font-weight: 700; color: #fff; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.cce-we-room { font-size: 10px; color: rgba(255, 255, 255, .65); margin-top: 2px }
+.cce-we-prof { font-size: 9px; color: rgba(255, 255, 255, .45); font-style: italic }
+.cce-month { border: 1px solid rgba(255, 255, 255, .06); border-radius: 16px; overflow: hidden; background: rgba(255, 255, 255, .012) }
+.cce-month-lbl { text-align: center; font-size: 16px; font-weight: 800; color: #f1f5f9; padding: 14px 0 6px; letter-spacing: -.3px }
+.cce-month-head { display: grid; grid-template-columns: repeat(7, 1fr); border-bottom: 1px solid rgba(255, 255, 255, .08); background: rgba(255, 255, 255, .025) }
+.cce-month-head div { text-align: center; padding: 8px 0; font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1px }
+.cce-month-grid { display: grid; grid-template-columns: repeat(7, 1fr) }
+.cce-mc { min-height: 72px; border-right: 1px solid rgba(255, 255, 255, .04); border-bottom: 1px solid rgba(255, 255, 255, .04); padding: 6px; display: flex; flex-direction: column; gap: 3px; transition: all .18s; position: relative }
+.cce-mc: nth-child(7n) { border-right: none }
+.cce-mc.empty { background: rgba(0, 0, 0, .08); cursor: default }
+.cce-mc.has-evs { cursor: pointer }
+.cce-mc.has-evs:hover { background: rgba(99, 102, 241, .06) }
+.cce-mc.today { background: rgba(99, 102, 241, .05) }
+.cce-mc.sel { background: rgba(99, 102, 241, .1)!important; box-shadow: inset 0 0 0 2px rgba(99, 102, 241, .35) }
+.cce-mc.conflict { box-shadow: inset 0-2px 0 0 rgba(239, 68, 68, .5) }
+.cce-mc-n { font-size: 13px; font-weight: 700; color: #94a3b8; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; border-radius: 7px }
+.tnow { background: linear-gradient(135deg, #6366f1, #4f46e5)!important; color: #fff!important; box-shadow: 0 2px 8px rgba(99, 102, 241, .3) }
+.cce-mc-dots { display: flex; gap: 3px; flex-wrap: wrap }
+.cce-mc-dot { width: 7px; height: 7px; border-radius: 50 % }
+.cce-mc-cnt { font-size: 9px; font-weight: 600; color: #64748b; margin-top: auto }
+.cce-month-detail { padding: 0; overflow: hidden; transition: all .3s ease }
+.cce-month-detail: not(: empty) { padding: 14px; border-top: 1px solid rgba(99, 102, 241, .15); background: rgba(99, 102, 241, .02) }
+.cce-md-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid rgba(255, 255, 255, .06) }
+.cce-md-day { font-size: 14px; font-weight: 700; color: #f1f5f9 }
+.cce-md-date { font-size: 11px; color: #64748b; margin-left: auto }
+
+#cce-modal { border: none; background: transparent; padding: 0; max-width: 500px; width: 90vw }
+#cce-modal::backdrop { background: rgba(0, 0, 0, .65); backdrop-filter: blur(5px) }
+.cce-m { background: linear-gradient(140deg, #0d1424, #1a2035); border: 1px solid rgba(99, 102, 241, .2); border-radius: 18px; padding: 22px; position: relative; box-shadow: 0 30px 70px rgba(0, 0, 0, .6); color: #e2e8f0 }
+.cce-m-x { position: absolute; top: 14px; right: 14px; background: rgba(255, 255, 255, .06); border: 1px solid rgba(255, 255, 255, .1); color: #94a3b8; width: 30px; height: 30px; border-radius: 8px; font-size: 13px; cursor: pointer; transition: all .2s; display: flex; align-items: center; justify-content: center }
+.cce-m-x:hover { background: rgba(239, 68, 68, .2); color: #f87171; border-color: rgba(239, 68, 68, .3) }
+.cce-m-hero { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; padding: 14px; background: rgba(255, 255, 255, .025); border-radius: 12px }
+.cce-m-room { font-size: 13px; font-weight: 800; color: #a5b4fc; min-width: 80px }
+.cce-m-room.dist { color: #38bdf8 }
+.cce-m-name { font-size: 16px; font-weight: 700; color: #f1f5f9; margin-bottom: 3px }
+.cce-m-prof { font-size: 12px; color: #94a3b8; font-style: italic }
+.cce-m-badges { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap }
+.cce-m-badge { font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 6px; letter-spacing: .5px; text-transform: uppercase }
+.cce-m-badge.type-th { background: rgba(59, 130, 246, .15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, .25) }
+.cce-m-badge.type-lab { background: rgba(249, 115, 22, .15); color: #fb923c; border: 1px solid rgba(249, 115, 22, .25) }
+.cce-m-badge.type-auto { background: rgba(34, 197, 94, .15); color: #4ade80; border: 1px solid rgba(34, 197, 94, .25) }
+.cce-m-badge.type-other { background: rgba(139, 92, 246, .15); color: #a78bfa; border: 1px solid rgba(139, 92, 246, .25) }
+.cce-m-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px }
+.cce-m-cell { background: rgba(255, 255, 255, .03); border: 1px solid rgba(255, 255, 255, .06); border-radius: 10px; padding: 10px; display: flex; flex-direction: column; gap: 3px }
+.cce-m-cell.wide { grid-column: 1 / -1 }
+.cce-m-lbl { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: #64748b }
+.cce-m-val { font-size: 13px; font-weight: 500; color: #e2e8f0 }
+.cce-m-action { display: block; width: 100 %; padding: 12px; text-align: center; font-size: 13px; font-weight: 600; color: #fff!important; background: linear-gradient(135deg, #6366f1, #4f46e5); border-radius: 10px; cursor: pointer; text-decoration: none!important; box-shadow: 0 2px 10px rgba(99, 102, 241, .2); transition: all .2s }
+.cce-m-action:hover { box-shadow: 0 6px 22px rgba(99, 102, 241, .45); transform: translateY(-1px) }
+.cce-m-nolink { text-align: center; font-size: 11px; color: #334155; font-style: italic; padding: 8px }
+
+/* Custom Scrollbar for Dashboard */
+:: -webkit-scrollbar { width: 8px; height: 8px; }
+:: -webkit-scrollbar-track { background: transparent; }
+:: -webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+:: -webkit-scrollbar-thumb:hover { background: rgba(99, 102, 241, 0.5); }
 `;
   document.head.appendChild(s);
 }
 
 function wipeAndRenderDashboard() {
   if (document.getElementById('cce-dashboard')) return;
-
-  // Collect data before wiping
   const userName = document.querySelector('.user-name span')?.textContent?.trim() || document.querySelector('.user-name')?.textContent?.split('\n')[0]?.trim() || 'Étudiant';
   const links = [];
   document.querySelectorAll('.bookmark').forEach(bk => {
@@ -1333,46 +1356,28 @@ function wipeAndRenderDashboard() {
   });
 
   document.body.classList.add('cce-clean-slate');
-
-  // Wipe body
   document.body.innerHTML = '';
-
   const dash = document.createElement('div');
   dash.id = 'cce-dashboard';
-
-  dash.innerHTML = `
-  <div class="cce-sidebar">
+  dash.innerHTML = `<div class="cce-sidebar" >
       <div class="cce-logo-box">
         <div class="cce-logo-img">✨</div>
         <div class="cce-logo-text">Enhancer</div>
       </div>
       <div class="cce-nav">
-        <div class="cce-nav-item active" data-view="agenda">
-          <span class="cce-nav-icon">📅</span> Agenda
-        </div>
-        <div class="cce-nav-item" data-view="links">
-          <span class="cce-nav-icon">🔗</span> Liens Utiles
-        </div>
-        <div class="cce-nav-item" data-view="valves">
-          <span class="cce-nav-icon">📑</span> Valves
-        </div>
+        <div class="cce-nav-item active" data-view="agenda"><span class="cce-nav-icon">📅</span> Agenda</div>
+        <div class="cce-nav-item" data-view="links"><span class="cce-nav-icon">🔗</span> Liens Utiles</div>
+        <div class="cce-nav-item" data-view="valves"><span class="cce-nav-icon">📑</span> Valves</div>
       </div>
       <div class="cce-user-box">
-        <div class="cce-user-info">
-          <span class="cce-user-name">${userName}</span>
-          <span class="cce-user-role">Étudiant Henallux</span>
-        </div>
+        <div class="cce-user-info"><span class="cce-user-name">${userName}</span><span class="cce-user-role">Étudiant Henallux</span></div>
       </div>
     </div>
   <div class="cce-main">
-    <div class="cce-header">
-      <h1 id="cce-dash-title">Dashboard</h1>
-    </div>
+    <div class="cce-header"><h1 id="cce-dash-title">Dashboard</h1></div>
     <div id="cce-dash-content" class="cce-view-container"></div>
-  </div>
-`;
+  </div>`;
   document.body.appendChild(dash);
-
   initSPALogic({ links, valves });
 }
 
@@ -1384,21 +1389,16 @@ function initSPALogic(data) {
   const switchView = (view) => {
     navItems.forEach(item => item.classList.toggle('active', item.dataset.view === view));
     dashTitle.textContent = view.charAt(0).toUpperCase() + view.slice(1);
-
-    dashContent.innerHTML = '<div class="cce-loading">Chargement...</div>';
+    dashContent.innerHTML = '';
 
     if (view === 'agenda') {
       const shell = document.createElement('div');
       shell.id = 'cce-agenda';
-      dashContent.innerHTML = '';
       dashContent.appendChild(shell);
-
-      setH(shell, `<div class="cce-bar"><div class="cce-bar-nav"><button class="cce-btn cce-ico" id="cce-prev">‹</button><button class="cce-btn cce-today-btn" id="cce-today">Aujourd'hui</button><button class="cce-btn cce-ico" id="cce-next">›</button></div><h2 class="cce-bar-title" id="cce-title"></h2><div class="cce-views"><button class="cce-vbtn active" data-view="list">☰</button><button class="cce-vbtn" data-view="week">▦</button><button class="cce-vbtn" data-view="month">📅</button></div></div><div id="cce-banner"></div><div id="cce-events"></div>`);
-
+      setH(shell, `<div class="cce-bar" ><div class="cce-bar-nav"><button class="cce-btn cce-ico" id="cce-prev">‹</button><button class="cce-btn cce-today-btn" id="cce-today">Aujourd'hui</button><button class="cce-btn cce-ico" id="cce-next">›</button></div><h2 class="cce-bar-title" id="cce-title"></h2><div class="cce-views"><button class="cce-vbtn active" data-view="list">☰</button><button class="cce-vbtn" data-view="week">▦</button><button class="cce-vbtn" data-view="month">📅</button></div></div><div id="cce-banner"></div><div id="cce-events"></div>`);
       document.getElementById('cce-prev').onclick = () => navFC('prev');
       document.getElementById('cce-next').onclick = () => navFC('next');
       document.getElementById('cce-today').onclick = () => navFC('today');
-
       shell.querySelectorAll('.cce-vbtn').forEach(btn => btn.onclick = () => {
         if (btn.dataset.view === currentView) return;
         currentView = btn.dataset.view;
@@ -1406,60 +1406,30 @@ function initSPALogic(data) {
         syncFCView();
         scheduleRefresh(80);
       });
-
-      chrome.storage.local.get(['agendaEvents'], res => {
-        renderFromEvents(res.agendaEvents || [], "Mon Horaire");
-      });
+      chrome.storage.local.get(['agendaEvents'], res => { renderFromEvents(res.agendaEvents || [], "Mon Horaire"); });
     } else if (view === 'links') {
-      if (!data.links.length) {
-        dashContent.innerHTML = '<div class="cce-empty">Aucun lien trouvé</div>';
-        return;
-      }
-      const cats = {};
-      data.links.forEach(l => {
-        cats[l.category] = cats[l.category] || [];
-        cats[l.category].push(l);
-      });
-
+      if (!data.links.length) { dashContent.innerHTML = '<div class="cce-empty">Aucun lien trouvé</div>'; return; }
+      const cats = {}; data.links.forEach(l => { cats[l.category] = cats[l.category] || []; cats[l.category].push(l); });
       dashContent.innerHTML = Object.entries(cats).map(([cat, links]) => `
-  <div class="cce-section">
+  <div class="cce-section" >
           <h2 class="cce-section-title">${cat}</h2>
           <div class="cce-links-grid">
-            ${links.map(l => `
-              <a href="${l.url}" class="cce-link-card" target="_blank">
-                <span class="cce-link-title">${l.title}</span>
-                <span class="cce-link-url">${l.url.replace(/^https?:\/\//, '')}</span>
-              </a>
-            `).join('')}
+            ${links.map(l => `<a href="${l.url}" class="cce-link-card" target="_blank"><span class="cce-link-title">${l.title}</span><span class="cce-link-url">${l.url.replace(/^https?:\/\//, '')}</span></a>`).join('')}
           </div>
-        </div>
-  `).join('');
+        </div> `).join('');
     } else if (view === 'valves') {
-      if (!data.valves.length) {
-        dashContent.innerHTML = '<div class="cce-empty">Aucune valve trouvée</div>';
-        return;
-      }
-      dashContent.innerHTML = `
-  <div class="cce-valves-list">
-    ${
-      data.valves.map(v => `
-            <div class="cce-valve-card">
-              <div class="cce-valve-header">
-                <span class="cce-valve-title">${v.title}</span>
-                <span class="cce-valve-date">${v.date}</span>
-              </div>
-              <div class="cce-valve-body">${v.content}</div>
-            </div>
-          `).join('')
-}
-        </div>
-  `;
+      if (!data.valves.length) { dashContent.innerHTML = '<div class="cce-empty">Aucune valve trouvée</div>'; return; }
+      dashContent.innerHTML = `<div class="cce-valves-list" > ${
+  data.valves.map(v => `
+        <div class="cce-valve-card">
+          <div class="cce-valve-header"><span class="cce-valve-title">${v.title}</span><span class="cce-valve-date">${v.date}</span></div>
+          <div class="cce-valve-body">${v.content}</div>
+        </div>`).join('')
+}</div> `;
     }
   };
-
-  navItems.forEach(item => {
-    item.onclick = () => switchView(item.dataset.view);
-  });
-
+  navItems.forEach(item => { item.onclick = () => switchView(item.dataset.view); });
   switchView('agenda');
 }
+
+

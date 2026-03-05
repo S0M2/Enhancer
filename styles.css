@@ -1,6 +1,48 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+/* ═══════════════════════════════════════════════════════
+   ENHANCER — premium design system
+   ═══════════════════════════════════════════════════════ */
 
-/* ── Reset ──────────────────────────────────────── */
+:root {
+  /* Dimensions & Spacing */
+  --w-popup: 500px;
+  --h-popup: 600px;
+  --r-xs: 5px;
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-xl: 24px;
+  --r-pill: 9999px;
+
+  /* Color Palette (Deep Dark Glassmorphism) */
+  --bg-app: #07080f;
+  --bg1: rgba(20, 24, 34, 0.7);
+  --bg2: rgba(30, 35, 48, 0.6);
+  --bg3: rgba(45, 52, 70, 0.8);
+  --bg4: #1e2238;
+
+  --border: rgba(255, 255, 255, 0.08);
+  --border-md: rgba(99, 102, 241, 0.22);
+  --border-hi: rgba(99, 102, 241, 0.45);
+
+  --text: #f0f4ff;
+  --muted: #7882a4;
+  --accent: #6366f1;
+  --accent-rgb: 99, 102, 241;
+  --accent2: #818cf8;
+  --accent3: #a5b4fc;
+  --green: #22c55e;
+  --red: #ef4444;
+
+  /* Glows & Shadows */
+  --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.6);
+  --glow-accent: 0 0 16px rgba(var(--accent-rgb), 0.3);
+
+  /* Typography */
+  --f-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* ── Reset ────────────────────────────────────────── */
 *,
 *::before,
 *::after {
@@ -9,204 +51,24 @@
   padding: 0;
 }
 
-/* ── Design Tokens ──────────────────────────────── */
-:root {
-  --bg0: #07080f;
-  --bg1: #0c0e1a;
-  --bg2: #111426;
-  --bg3: #181b2e;
-  --bg4: #1e2238;
-  --border: rgba(255, 255, 255, .06);
-  --border-md: rgba(99, 102, 241, .22);
-  --border-hi: rgba(99, 102, 241, .45);
-  --text: #f0f4ff;
-  --text-sub: #c5cde8;
-  --muted: #7882a4;
-  --accent: #6366f1;
-  --accent2: #818cf8;
-  --accent3: #a5b4fc;
-  --green: #22c55e;
-  --red: #ef4444;
-  --r: 12px;
-  --r-sm: 8px;
-  --r-xs: 5px;
-  --shadow-sm: 0 2px 10px rgba(0, 0, 0, .4);
-  --shadow-md: 0 4px 24px rgba(0, 0, 0, .5);
-  --glow: 0 0 16px rgba(99, 102, 241, .3);
-}
-
-/* ── Base ───────────────────────────────────────── */
 html {
   font-size: 13px;
 }
 
 body {
-  width: 500px;
-  min-height: 540px;
-  max-height: 620px;
-  background: var(--bg0);
-  color: var(--text);
-  font-family: 'Inter', system-ui, sans-serif;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  position: relative;
-}
-
-/* Ambient glow behind header */
-body::before {
-  content: '';
-  position: absolute;
-  top: -60px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 300px;
-  height: 200px;
-  background: radial-gradient(ellipse, rgba(99, 102, 241, .18) 0%, transparent 70%);
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* ── Scrollbar ──────────────────────────────────── */
-::-webkit-scrollbar {
-  width: 4px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--bg4);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--accent);
-}
-
-/* ── Focus visible ──────────────────────────────── */
-:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-  border-radius: 4px;
-}
-
-/* ── Header ─────────────────────────────────────── */
-.hdr {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px 18px 14px;
-  border-bottom: 1px solid var(--border);
-  background: linear-gradient(160deg, rgba(99, 102, 241, .1) 0%, rgba(139, 92, 246, .04) 50%, transparent 100%);
-  flex-shrink: 0;
-  position: relative;
-  z-index: 1;
-}
-
-.hdr-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.hdr-logo {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  object-fit: cover;
-  box-shadow: 0 0 0 1px rgba(99, 102, 241, .3), 0 4px 16px rgba(99, 102, 241, .25);
-}
-
-.hdr-title {
-  font-size: 16px;
-  font-weight: 800;
-  letter-spacing: -.5px;
-  color: #fff;
-}
-
-.hdr-sub {
-  font-size: 10px;
-  color: var(--muted);
-  margin-top: 2px;
-  letter-spacing: .2px;
-}
-
-.hdr-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 9px;
-  font-weight: 700;
-  padding: 2px 7px;
-  background: rgba(99, 102, 241, .14);
-  border: 1px solid var(--border-md);
-  border-radius: 20px;
-  color: var(--accent3);
-  margin-top: 3px;
-}
-
-/* ── Toggle ─────────────────────────────────────── */
-/* ═══════════════════════════════════════════════════════
-   ENHANCER — styles.css (Premium UI/UX Overhaul)
-   ═══════════════════════════════════════════════════════ */
-
-:root {
-  /* Dimensions & Spacing */
-  --w-popup: 500px;
-  --h-popup: 600px;
-  --r-sm: 8px;
-  --r-md: 12px;
-  --r-lg: 16px;
-  --r-xl: 24px;
-  --r-pill: 9999px;
-
-  /* Color Palette (Deep Dark Glassmorphism) */
-  --bg-app: #090B10;
-  --bg1: rgba(20, 24, 34, 0.7);
-  --bg2: rgba(30, 35, 48, 0.6);
-  --bg3: rgba(45, 52, 70, 0.8);
-
-  --border: rgba(255, 255, 255, 0.08);
-  --border-md: rgba(255, 255, 255, 0.15);
-
-  --text: #F8FAFC;
-  --muted: #94A3B8;
-  --accent: #6366F1;
-  --accent-rgb: 99, 102, 241;
-  --accent2: #E2E8F0;
-  --red: #EF4444;
-
-  /* Glows & Shadows */
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.6);
-  --glow-accent: 0 0 16px rgba(var(--accent-rgb), 0.3);
-
-  /* Typography */
-  --f-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-}
-
-/* ── Base ────────────────────────────────────────── */
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
   width: var(--w-popup);
+  min-height: 540px;
   max-height: var(--h-popup);
   background: var(--bg-app);
   color: var(--text);
   font-family: var(--f-sans);
-  font-size: 13px;
-  line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
   display: flex;
   flex-direction: column;
   overflow-y: auto;
-  /* Fix global hidden overflow bug */
   overflow-x: hidden;
+  position: relative;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
 }
 
 /* Scrollbar minimale */
