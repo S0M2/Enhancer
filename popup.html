@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enhancer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <header class="hdr">
+    <div class="hdr-left">
+      <img src="icons/icon48.png" class="hdr-logo" alt="">
+      <div>
+        <div class="hdr-title">Enhancer</div>
+        <div class="hdr-sub">v3.2 · Portail &amp; Moodle</div>
+      </div>
+    </div>
+    <label class="toggle">
+      <input type="checkbox" id="masterToggle" checked>
+      <span class="track"><span class="thumb"></span></span>
+    </label>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab active" data-tab="agenda">📅 Agenda</button>
+    <button class="tab" data-tab="couleurs">🎨 Couleurs</button>
+    <button class="tab" data-tab="moodle">🎓 Moodle</button>
+    <button class="tab" data-tab="portal">🌐 Portail</button>
+    <button class="tab" data-tab="custom">✏️ CSS</button>
+  </nav>
+
+  <!-- AGENDA -->
+  <div class="panel active" id="tab-agenda">
+    <div class="search-wrap">
+      <input type="text" id="agendaSearch" placeholder="🔍 Rechercher un cours…" class="search-input">
+    </div>
+    <div id="agendaList" class="course-list"></div>
+  </div>
+
+  <!-- COULEURS -->
+  <div class="panel" id="tab-couleurs">
+    <div class="search-wrap">
+      <input type="text" id="colorSearch" placeholder="🔍 Rechercher…" class="search-input">
+    </div>
+    <div class="bulk-row">
+      <button class="btn-sm" id="selectAll">✓ Tout</button>
+      <button class="btn-sm" id="deselectAll">✗ Aucun</button>
+      <div class="bac-btns">
+        <button class="btn-bac" data-bac="1">BAC 1</button>
+        <button class="btn-bac" data-bac="2">BAC 2</button>
+        <button class="btn-bac" data-bac="3">BAC 3</button>
+      </div>
+    </div>
+    <div id="colorList" class="course-list"></div>
+  </div>
+
+  <!-- MOODLE -->
+  <div class="panel" id="tab-moodle">
+    <div class="section-title">Apparence</div>
+
+    <div class="row-setting">
+      <div class="row-info">
+        <span class="row-label">Mode sombre</span>
+        <span class="row-desc">Thème dark premium sur Moodle</span>
+      </div>
+      <label class="toggle sm"><input type="checkbox" id="darkMode" checked><span class="track"><span
+            class="thumb"></span></span></label>
+    </div>
+
+    <div class="row-setting">
+      <div class="row-info">
+        <span class="row-label">Couleur d'accentuation</span>
+        <span class="row-desc">Teinte principale de l'interface</span>
+      </div>
+      <input type="color" id="accentColor" value="#6366f1" class="color-pill">
+    </div>
+
+    <div class="section-title mt">Blocs visibles</div>
+    <div class="row-setting">
+      <div class="row-info"><span class="row-label">Timeline</span></div>
+      <label class="toggle sm"><input type="checkbox" id="showTimeline" checked><span class="track"><span
+            class="thumb"></span></span></label>
+    </div>
+    <div class="row-setting">
+      <div class="row-info"><span class="row-label">Calendrier</span></div>
+      <label class="toggle sm"><input type="checkbox" id="showCalendar" checked><span class="track"><span
+            class="thumb"></span></span></label>
+    </div>
+    <div class="row-setting">
+      <div class="row-info"><span class="row-label">Cours récents</span></div>
+      <label class="toggle sm"><input type="checkbox" id="showRecent" checked><span class="track"><span
+            class="thumb"></span></span></label>
+    </div>
+
+    <div class="section-title mt">Masquer éléments</div>
+    <div class="row-setting">
+      <div class="row-info"><span class="row-label">Notifications / Nav user</span></div>
+      <label class="toggle sm"><input type="checkbox" id="hideNotifs"><span class="track"><span
+            class="thumb"></span></span></label>
+    </div>
+    <div class="row-setting">
+      <div class="row-info"><span class="row-label">Footer</span></div>
+      <label class="toggle sm"><input type="checkbox" id="hideFooterM"><span class="track"><span
+            class="thumb"></span></span></label>
+    </div>
+    <div class="row-setting">
+      <div class="row-info"><span class="row-label">Sidebar / Drawer</span></div>
+      <label class="toggle sm"><input type="checkbox" id="hideSidebar"><span class="track"><span
+            class="thumb"></span></span></label>
+    </div>
+  </div>
+
+  <!-- PORTAIL -->
+  <div class="panel" id="tab-portal">
+    <div class="section-title">Thème</div>
+
+    <div class="theme-grid">
+      <button class="theme-btn active" data-theme="default">
+        <div class="theme-preview tp-default">
+          <div class="tp-bar"></div>
+          <div class="tp-lines">
+            <div></div>
+            <div></div>
+            <div></div>
+          </div>
+        </div>
+        <span>Défaut</span>
+      </button>
+      <button class="theme-btn" data-theme="light">
+        <div class="theme-preview tp-light">
+          <div class="tp-bar"></div>
+          <div class="tp-lines">
+            <div></div>
+            <div></div>
+            <div></div>
+          </div>
+        </div>
+        <span>Clair ☀️</span>
+      </button>
+      <button class="theme-btn" data-theme="dark">
+        <div class="theme-preview tp-dark">
+          <div class="tp-bar"></div>
+          <div class="tp-lines">
+            <div></div>
+            <div></div>
+            <div></div>
+          </div>
+        </div>
+        <span>Sombre 🌙</span>
+      </button>
+    </div>
+
+    <div class="row-setting" style="margin-top:10px">
+      <div class="row-info">
+        <span class="row-label">Couleur d'accent</span>
+        <span class="row-desc">Boutons, liens, surbrillances</span>
+      </div>
+      <input type="color" id="portalAccent" value="#6366f1" class="color-pill">
+    </div>
+
+    <div class="section-title mt">Masquer éléments</div>
+    <div class="row-setting">
+      <div class="row-info"><span class="row-label">Barre de navigation</span></div>
+      <label class="toggle sm"><input type="checkbox" id="portalHideNavbar"><span class="track"><span
+            class="thumb"></span></span></label>
+    </div>
+    <div class="row-setting">
+      <div class="row-info"><span class="row-label">Footer</span></div>
+      <label class="toggle sm"><input type="checkbox" id="portalHideFooter"><span class="track"><span
+            class="thumb"></span></span></label>
+    </div>
+    <div class="row-setting">
+      <div class="row-info"><span class="row-label">Sidebar</span></div>
+      <label class="toggle sm"><input type="checkbox" id="portalHideSidebar"><span class="track"><span
+            class="thumb"></span></span></label>
+    </div>
+  </div>
+
+  <!-- CSS CUSTOM -->
+  <div class="panel" id="tab-custom">
+    <div class="css-tabs">
+      <button class="css-tab active" data-target="css-moodle-wrap">Moodle</button>
+      <button class="css-tab" data-target="css-portal-wrap">Portail</button>
+    </div>
+
+    <div id="css-moodle-wrap" class="css-wrap active">
+      <div class="css-hint">Injecté sur <strong>moodle.henallux.be</strong></div>
+      <textarea id="cssMoodle" class="css-editor" placeholder="/* Ex: body { font-size: 15px; } */"></textarea>
+      <div class="css-presets">
+        <span class="preset-lbl">Presets :</span>
+        <button class="preset-btn" data-css-target="moodle" data-preset="hideHeader"># Header</button>
+        <button class="preset-btn" data-css-target="moodle" data-preset="bigCards">Cards XL</button>
+        <button class="preset-btn" data-css-target="moodle" data-preset="noBanner"># Bannière</button>
+        <button class="preset-btn" data-css-target="moodle" data-preset="clearAll">🗑 Vider</button>
+      </div>
+    </div>
+
+    <div id="css-portal-wrap" class="css-wrap">
+      <div class="css-hint">Injecté sur <strong>portail.henallux.be</strong></div>
+      <textarea id="cssPortal" class="css-editor" placeholder="/* Ex: .nav-link { font-weight: 700; } */"></textarea>
+      <div class="css-presets">
+        <span class="preset-lbl">Presets :</span>
+        <button class="preset-btn" data-css-target="portal" data-preset="hideTopBar"># Topbar</button>
+        <button class="preset-btn" data-css-target="portal" data-preset="wideLayout">Large</button>
+        <button class="preset-btn" data-css-target="portal" data-preset="clearAll">🗑 Vider</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <span class="status" id="statusMsg"></span>
+    <button class="save-btn" id="saveBtn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z" />
+        <polyline points="17 21 17 13 7 13 7 21" />
+        <polyline points="7 3 7 8 15 8" />
+      </svg>
+      Sauvegarder &amp; Appliquer
+    </button>
+  </footer>
+
+  <script src="popup.js"></script>
+</body>
+
+</html>
