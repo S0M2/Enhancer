@@ -184,7 +184,10 @@ function applyPortalHides() {
   hide('.navbar, #navbar, header.navbar', portalSettings.hideNavbar);
   hide('footer, #footer, .footer', portalSettings.hideFooter);
   hide('.sidebar, #sidebar, .aside', portalSettings.hideSidebar);
+  // Always hide <hr> on Portal — they leave ugly white lines
+  document.querySelectorAll('hr').forEach(hr => hr.style.setProperty('display', 'none', 'important'));
 }
+
 
 function hexToRgb(hex) {
   const m = hex.replace('#', '').match(/.{2}/g);
@@ -741,7 +744,12 @@ function injectMoodleCSS() {
 :root{--cce-bg:#060912;--cce-card:rgba(17,24,39,.45);--cce-text:#f3f4f6;--cce-muted:#9ca3af;--cce-border:rgba(255,255,255,.08);--cce-accent:#6366f1;--cce-glow:rgba(99,102,241,.25);--cce-glass:rgba(8,12,22,.88);}
 body.cce-dark{background:var(--cce-bg)!important;color:var(--cce-text)!important;}
 body.cce-dark #page-wrapper,body.cce-dark #page,body.cce-dark #region-main{background:var(--cce-bg)!important;}
-body.cce-dark .bg-white,body.cce-dark .card,body.cce-dark .card-body,body.cce-dark .list-group-item{background:transparent!important;color:var(--cce-text)!important;border-color:var(--cce-border)!important;}
+body.cce-dark .bg-white,body.cce-dark .card,body.cce-dark .card-body,body.cce-dark .list-group-item,body.cce-dark .simplesearchform,body.cce-dark .searchbar,body.cce-dark .input-group{background:transparent!important;color:var(--cce-text)!important;border-color:var(--cce-border)!important;}
+body.cce-dark input[type="text"],body.cce-dark input[type="search"],body.cce-dark .form-control,body.cce-dark input.withclear{background:rgba(255,255,255,.05)!important;color:var(--cce-text)!important;border:1px solid var(--cce-border)!important;border-radius:10px!important;}
+body.cce-dark input::placeholder{color:var(--cce-muted)!important;}
+body.cce-dark .btn-outline-secondary,.cce-dark .btn.btn-outline-secondary{background:rgba(255,255,255,.05)!important;border-color:var(--cce-border)!important;color:var(--cce-muted)!important;}
+body.cce-dark .btn-outline-secondary:hover{background:rgba(99,102,241,.12)!important;border-color:rgba(99,102,241,.3)!important;color:#c7d2fe!important;}
+body.cce-dark .border-bottom,.cce-dark .pb-3.px-2.border-bottom{border-color:var(--cce-border)!important;}
 body.cce-dark #page-content,body.cce-dark .block_recentlyaccessedcourses,body.cce-dark .block_timeline,body.cce-dark .block_calendar_month{background:var(--cce-glass)!important;backdrop-filter:blur(20px)!important;border-radius:20px!important;padding:18px!important;margin-bottom:20px!important;border:1px solid var(--cce-border)!important;}
 body.cce-dark .coursename{color:#fff!important;font-weight:700!important;}
 body.cce-dark .text-muted{color:var(--cce-muted)!important;}
