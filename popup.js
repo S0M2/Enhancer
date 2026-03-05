@@ -379,14 +379,53 @@ function renderColorTab(filter = '') {
 function bindTabs() {
   const tabs = [...document.querySelectorAll('.tab')];
   const panels = [...document.querySelectorAll('.panel')];
+  const scrollTopBtn = document.getElementById('scrollTopBtn');
+
   tabs.forEach(tab => {
     tab.addEventListener('click', () => {
+      const target = tab.dataset.tab;
+
       tabs.forEach(t => t.classList.remove('active'));
-      panels.forEach(p => p.classList.remove('active'));
       tab.classList.add('active');
-      document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+
+      panels.forEach(p => {
+        p.classList.remove('active', 'fade-in');
+      });
+
+      const activePanel = document.getElementById(`tab-${target}`);
+      activePanel.classList.add('active');
+
+      // Force reflow for animation
+      setTimeout(() => {
+        activePanel.classList.add('fade-in');
+      }, 10);
+
+      // Reset scroll when switching tabs
+      window.scrollTo({ top: 0 });
+      if (scrollTopBtn) scrollTopBtn.classList.remove('visible');
     });
   });
+
+  // Initial fade-in for the active panel
+  const activePanel = document.querySelector('.panel.active');
+  if (activePanel) {
+    setTimeout(() => activePanel.classList.add('fade-in'), 10);
+  }
+
+  // Scroll to top logic
+  if (scrollTopBtn) {
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 200) {
+        scrollTopBtn.classList.add('visible');
+      } else {
+        scrollTopBtn.classList.remove('visible');
+      }
+    });
+
+    scrollTopBtn.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
 }
 
 function bindCssTabs() {

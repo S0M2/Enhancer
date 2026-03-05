@@ -30,11 +30,42 @@
 
   <!-- ── Tabs ── -->
   <nav class="tabs" role="tablist">
-    <button class="tab active" data-tab="agenda" role="tab">Agenda</button>
-    <button class="tab" data-tab="couleurs" role="tab">Couleurs</button>
-    <button class="tab" data-tab="portal" role="tab">Portail</button>
-    <button class="tab" data-tab="moodle" role="tab">Moodle</button>
-    <button class="tab" data-tab="custom" role="tab">CSS</button>
+    <button class="tab active" data-tab="agenda" role="tab">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+        <line x1="16" y1="2" x2="16" y2="6"></line>
+        <line x1="8" y1="2" x2="8" y2="6"></line>
+        <line x1="3" y1="10" x2="21" y2="10"></line>
+      </svg>
+      Agenda
+    </button>
+    <button class="tab" data-tab="couleurs" role="tab">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
+      </svg>
+      Couleurs
+    </button>
+    <button class="tab" data-tab="portal" role="tab">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+        <polyline points="22,6 12,13 2,6"></polyline>
+      </svg>
+      Portail
+    </button>
+    <button class="tab" data-tab="moodle" role="tab">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+        <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+      </svg>
+      Moodle
+    </button>
+    <button class="tab" data-tab="custom" role="tab">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <polyline points="16 18 22 12 16 6"></polyline>
+        <polyline points="8 6 2 12 8 18"></polyline>
+      </svg>
+      CSS
+    </button>
   </nav>
 
   <!-- ══ AGENDA ══ -->
@@ -339,6 +370,13 @@
       </div>
     </div>
   </div>
+
+  <!-- Scroll to Top Button -->
+  <button id="scrollTopBtn" class="scroll-to-top" aria-label="Retour en haut" title="Retour en haut">
+    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  </button>
 
   <!-- ── Footer ── -->
   <footer class="footer">
