@@ -192,7 +192,57 @@ function applyPortalHides() {
   if (plannings && bookmarks && bookmarks.parentNode && plannings !== bookmarks.previousElementSibling) {
     bookmarks.parentNode.insertBefore(plannings, bookmarks);
   }
+
+  // Make Announcements (Valves) collapsible
+  const annSection = document.getElementById('section-announcements');
+  if (annSection) {
+    const header = annSection.querySelector('header .heading-title-tools');
+    const content = annSection.querySelector('#announcements');
+    if (header && content && !header.dataset.cceCollapsible) {
+      header.dataset.cceCollapsible = 'true';
+      header.style.cursor = 'pointer';
+      header.title = 'Cliquer pour réduire / agrandir';
+
+      const toggleIcon = document.createElement('span');
+      toggleIcon.className = 'cce-collapse-icon';
+      toggleIcon.innerHTML = '▼';
+      toggleIcon.style.cssText = 'margin-left:auto; transition: transform 0.3s ease; font-size: 14px; color: var(--pd-muted); display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: rgba(255,255,255,0.05);';
+
+      // Inject icon after the title
+      const h1 = header.querySelector('h1');
+      if (h1) {
+        h1.style.margin = '0';
+        h1.parentNode.insertBefore(toggleIcon, h1.nextSibling);
+      } else {
+        header.appendChild(toggleIcon);
+      }
+
+      // Add transition to content
+      content.style.transition = 'max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease, margin 0.3s ease';
+      content.style.overflow = 'hidden';
+      content.style.transformOrigin = 'top';
+
+      header.addEventListener('click', (e) => {
+        // Don't trigger if clicking the help button or tools
+        if (e.target.closest('.tools-desktop') || e.target.tagName.toLowerCase() === 'button') return;
+
+        const isCollapsed = annSection.classList.toggle('cce-collapsed');
+        if (isCollapsed) {
+          content.style.maxHeight = '0px';
+          content.style.opacity = '0';
+          content.style.marginTop = '0';
+          toggleIcon.style.transform = 'rotate(-90deg)';
+        } else {
+          content.style.maxHeight = content.scrollHeight + 200 + 'px'; // +200 for dynamic content
+          content.style.opacity = '1';
+          content.style.marginTop = '';
+          toggleIcon.style.transform = 'rotate(0deg)';
+        }
+      });
+    }
+  }
 }
+
 
 
 function hexToRgb(hex) {
