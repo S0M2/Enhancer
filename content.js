@@ -1503,8 +1503,8 @@ function injectDashboardCSS() {
   s.textContent = `
 /* ═══ SPA DASHBOARD PREMIUM STYLES ═══ */
 #cce-agenda, #cce-agenda * { box-sizing:border-box }
-#cce-agenda { color: #e2e8f0; font-family: 'Inter', system-ui, sans-serif; max-width: 1140px; margin: 0 auto; padding: 32px 20px; animation: fadeIn 0.4s ease-out; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+#cce-agenda { color: #e2e8f0; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 1200px; margin: 0 auto; padding: 40px 24px; animation: fadeIn 0.5s ease-out; background: linear-gradient(135deg, rgba(99, 102, 241, 0.02), rgba(139, 92, 246, 0.01)); border-radius: 24px; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
 .cce-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; gap: 16px; flex-wrap: wrap; background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(139, 92, 246, 0.02)); padding: 18px 24px; border-radius: 16px; border: 1px solid rgba(99, 102, 241, 0.15); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
 .cce-bar-nav { display: flex; align-items: center; gap: 8px }
@@ -1513,18 +1513,18 @@ function injectDashboardCSS() {
 .cce-btn:active { transform: translateY(0); box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
 .cce-ico { width: 40px; padding: 10px 0; text-align: center; font-size: 18px }
 .cce-today-btn { background: linear-gradient(135deg, #6366f1, #4f46e5); border-color: transparent; color: #fff; box-shadow: 0 4px 15px rgba(99, 102, 241, .3); }
-.cce-bar-title { font-size: 22px; font-weight: 800; letter-spacing: -.8px; color: #fff; margin: 0 }
+.cce-bar-title { font-size: 24px; font-weight: 900; letter-spacing: -1px; color: #f1f5f9; margin: 0; background: linear-gradient(135deg, #e0e7ff, #d8b4fe); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
 .cce-views { display: flex; gap: 4px; background: rgba(0, 0, 0, .2); border-radius: 14px; padding: 4px }
 .cce-vbtn { background: transparent; border: none; color: #64748b; font-size: 15px; padding: 8px 14px; border-radius: 10px; cursor: pointer; font-family: inherit; transition: all 0.2s; }
 .cce-vbtn.active { background: rgba(255, 255, 255, 0.08); color: #fff; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); }
 
-#cce-banner { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 34px }
+#cce-banner { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 40px; }
 .cce-bc { background: linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01)); border: 1px solid rgba(99, 102, 241, 0.15); border-radius: 16px; padding: 20px 24px; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.05); }
 .cce-bc:hover { border-color: rgba(99, 102, 241, 0.35); transform: translateY(-4px); background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(99, 102, 241, 0.03)); box-shadow: 0 12px 24px rgba(99, 102, 241, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.08); }
 .cce-bc-cur { border-left: 5px solid #818cf8; background: linear-gradient(135deg, rgba(129, 140, 248, 0.12), rgba(99, 102, 241, 0.05)); }
 .cce-bc-nxt { border-left: 5px solid #a78bfa; background: linear-gradient(135deg, rgba(167, 139, 250, 0.12), rgba(139, 92, 246, 0.05)); }
 
-.cce-day { margin-bottom: 30px }
+.cce-day { margin-bottom: 36px; background: linear-gradient(135deg, rgba(255, 255, 255, 0.01), transparent); border-radius: 16px; overflow: hidden; border: 1px solid rgba(99, 102, 241, 0.05); transition: all 0.3s ease; }
 .cce-day-head { display: flex; align-items: center; gap: 12px; padding: 14px 18px; background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(99, 102, 241, 0.03)); border-bottom: 2px solid rgba(99, 102, 241, 0.2); margin-bottom: 18px; border-radius: 12px; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.1); transition: all 0.3s ease; }
 .cce-day-head:hover { border-bottom-color: rgba(99, 102, 241, 0.3); box-shadow: 0 8px 16px rgba(99, 102, 241, 0.15); background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(99, 102, 241, 0.05)); }
 .cce-day-name { font-size: 17px; font-weight: 800; color: #e0e7ff; letter-spacing: -0.2px; text-transform: capitalize; }
