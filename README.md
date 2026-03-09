@@ -4,7 +4,7 @@
 
 **L'extension Chrome qui transforme ton expérience sur le Portail et Moodle HENALLUX**
 
-![Version](https://img.shields.io/badge/version-3.5.0-6366f1?style=for-the-badge&labelColor=0d1117)
+![Version](https://img.shields.io/badge/version-3.6.0-6366f1?style=for-the-badge&labelColor=0d1117)
 ![Manifest](https://img.shields.io/badge/Manifest-V3-22c55e?style=for-the-badge&labelColor=0d1117)
 ![Chrome](https://img.shields.io/badge/Chrome-Compatible-4285F4?style=for-the-badge&logo=googlechrome&logoColor=white&labelColor=0d1117)
 
@@ -160,6 +160,15 @@ PortalRefound-Chromium/
 ---
 
 ## 📝 Changelog
+
+### v3.6 (Janvier 2025) — 🏗️ **Architecture Refactoring + Responsive**
+- 🏗️ **Clean code refactoring** — Séparation en modules (utils, services, ui)
+- 📱 **Responsive design complete** — Mobile-first, tablets, desktop, landscape
+- ♿ **Accessibility** — Prefers-reduced-motion, high-contrast mode, 44px touch targets
+- 📚 **Documentation** — ARCHITECTURE.md avec principes SOLID appliqués
+- 🧹 **Code principles** — JSDoc, error handling, async/await, DRY, SoC
+- 🔧 **Ready for bundler** — Structure prepared for Webpack/Rollup/Vite migration
+- ✅ Tous les fichiers passent validation Node.js syntax
 
 ### v3.5 (Janvier 2025) — 🎨 **Premium UI Overhaul**
 - 🎨 **Dashboard CSS rewrite** — Gradients, shadows, et transitions premium partout
