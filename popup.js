@@ -51,12 +51,16 @@ document.addEventListener('DOMContentLoaded', () => {
 function loadData() {
   const keys = ['courseSettings', 'knownCourses', 'moodleSettings', 'portalSettings', 'customCSS', 'extensionEnabled'];
   chrome.storage.local.get(keys, (res) => {
-    if (chrome.runtime.lastError) return;
+    try {
+      if (chrome.runtime.lastError) {
+        console.error('Storage read error:', chrome.runtime.lastError);
+        return;
+      }
 
-    courseSettings = res.courseSettings || {};
-    knownCourses = res.knownCourses || [];
-    customCSS = res.customCSS || { moodle: '', portal: '' };
-    enabled = res.extensionEnabled !== false;
+      courseSettings = (res.courseSettings && typeof res.courseSettings === 'object') ? res.courseSettings : {};
+      knownCourses = Array.isArray(res.knownCourses) ? res.knownCourses : [];
+      customCSS = (res.customCSS && typeof res.customCSS === 'object') ? res.customCSS : { moodle: '', portal: '' };
+      enabled = res.extensionEnabled !== false;
 
     const m = res.moodleSettings || {};
     moodleSettings = {
@@ -103,6 +107,9 @@ function loadData() {
     syncCoursesFromTab();
     renderAgendaTab();
     renderColorTab();
+    } catch (err) {
+      console.error('Error loading data:', err);
+    }
   });
 }
 

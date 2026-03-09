@@ -20,7 +20,7 @@ function debounce(fn, ms) {
 
 const defMoodle = () => ({ dark: true, accentColor: '#6366f1', compactCards: false, hideBanners: false, noAnimations: false, timeline: true, calendar: true, recent: true, showNextTimeline: true, hideNavbar: false, hideSidebar: false, hidePageHeader: false, hideNotifs: false, hideEditMode: false, hideFooter: false, showCourseCategory: true, showFavourite: true, showPagination: true });
 
-const defPortal = () => ({ theme: 'default', accentColor: '#6366f1', hideNavbar: false, hideFooter: false, hideSidebar: false, cleanSlate: true });
+const defPortal = () => ({ theme: 'default', accentColor: '#6366f1', hideNavbar: false, hideFooter: false, hideSidebar: false, cleanSlate: true, showBkmPedagogic: true, showBkmInfos: true, showBkmTools: true, showBkmDepartment: true, showBkmCloud: true, showBkmPersonal: true });
 
 function normPS(s) {
   const d = defPortal();
@@ -32,29 +32,42 @@ function normPS(s) {
     hideFooter: s.hideFooter ?? d.hideFooter,
     hideSidebar: s.hideSidebar ?? d.hideSidebar,
     cleanSlate: s.cleanSlate ?? d.cleanSlate,
+    showBkmPedagogic: s.showBkmPedagogic ?? d.showBkmPedagogic,
+    showBkmInfos: s.showBkmInfos ?? d.showBkmInfos,
+    showBkmTools: s.showBkmTools ?? d.showBkmTools,
+    showBkmDepartment: s.showBkmDepartment ?? d.showBkmDepartment,
+    showBkmCloud: s.showBkmCloud ?? d.showBkmCloud,
+    showBkmPersonal: s.showBkmPersonal ?? d.showBkmPersonal,
   };
 }
 
 chrome.storage.local.get(['courseSettings', 'knownCourses', 'moodleSettings', 'portalSettings', 'customCSS', 'extensionEnabled'], res => {
-  if (chrome.runtime.lastError) return;
-  if (res.courseSettings) courseSettings = res.courseSettings;
-  if (res.knownCourses) res.knownCourses.forEach(c => knownCourses.add(c));
-  moodleSettings = normMS(res.moodleSettings);
-  portalSettings = normPS(res.portalSettings);
-  customCSS = res.customCSS || {};
-  enabled = res.extensionEnabled !== false;
-  replaceLogo();
-  if (!enabled) return;
-  if (isMoodle) initMoodle();
-  else if (isPortal) {
-    if (portalSettings.cleanSlate) wipeAndRenderDashboard();
-    else {
-      applyPortalTheme();
-      if (isAgenda) waitForFC();
-      else if (isHome) initHome();
+  try {
+    if (chrome.runtime.lastError) {
+      console.error('Storage read error:', chrome.runtime.lastError);
+      return;
     }
+    if (res.courseSettings && typeof res.courseSettings === 'object') courseSettings = res.courseSettings;
+    if (Array.isArray(res.knownCourses)) res.knownCourses.forEach(c => knownCourses.add(c));
+    moodleSettings = normMS(res.moodleSettings);
+    portalSettings = normPS(res.portalSettings);
+    customCSS = (res.customCSS && typeof res.customCSS === 'object') ? res.customCSS : {};
+    enabled = res.extensionEnabled !== false;
+    replaceLogo();
+    if (!enabled) return;
+    if (isMoodle) initMoodle();
+    else if (isPortal) {
+      if (portalSettings.cleanSlate) wipeAndRenderDashboard();
+      else {
+        applyPortalTheme();
+        if (isAgenda) waitForFC();
+        else if (isHome) initHome();
+      }
+    }
+    applyCustomCSS();
+  } catch (err) {
+    console.error('Error initializing Enhancer:', err);
   }
-  applyCustomCSS();
 });
 
 chrome.storage.onChanged.addListener((changes, ns) => {
