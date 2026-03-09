@@ -53,15 +53,28 @@ chrome.storage.local.get(['courseSettings', 'knownCourses', 'moodleSettings', 'p
     portalSettings = normPS(res.portalSettings);
     customCSS = (res.customCSS && typeof res.customCSS === 'object') ? res.customCSS : {};
     enabled = res.extensionEnabled !== false;
+    
+    console.log('Enhancer init:', { isMoodle, isPortal, isAgenda, isHome, enabled });
+    
     replaceLogo();
     if (!enabled) return;
-    if (isMoodle) initMoodle();
-    else if (isPortal) {
-      if (portalSettings.cleanSlate) wipeAndRenderDashboard();
-      else {
-        applyPortalTheme();
-        if (isAgenda) waitForFC();
-        else if (isHome) initHome();
+    
+    if (isMoodle) {
+      console.log('Initializing Moodle');
+      initMoodle();
+    } else if (isPortal) {
+      console.log('Initializing Portal');
+      applyPortalTheme();
+      applyPortalHides();
+      
+      if (isAgenda) {
+        console.log('Initializing Agenda');
+        waitForFC();
+      } else if (isHome) {
+        console.log('Initializing Home');
+        initHome();
+      } else {
+        console.log('Portal page (not agenda/home), applying theme only');
       }
     }
     applyCustomCSS();
@@ -169,7 +182,7 @@ function applyCustomCSS() {
 function applyPortalTheme() {
   if (!isPortal) return;
   
-  const themeName = portalSettings.theme || 'default';
+  const themeName = portalSettings.theme || 'darkPremium';
   const accent = portalSettings.accentColor || '#6366f1';
 
   let el = document.getElementById('cce-portal-theme');
@@ -179,24 +192,185 @@ function applyPortalTheme() {
     document.head.appendChild(el); 
   }
 
-  // Check if THEMES is available (from themes.js)
-  if (typeof THEMES !== 'undefined' && THEMES[themeName]) {
-    const theme = THEMES[themeName];
-    try {
-      el.textContent = theme.apply(accent);
-    } catch (err) {
-      console.error('Error applying theme:', err);
-      el.textContent = '';
-    }
-  } else if (themeName === 'default') {
-    el.textContent = '';
-  } else {
-    console.warn('Theme not found:', themeName);
-    el.textContent = '';
-  }
-
+  // Build portal-specific theme CSS
+  const css = buildPortalThemeCSS(themeName, accent);
+  el.textContent = css;
+  
+  console.log('Applied Portal theme:', themeName, 'Accent:', accent);
+  
   // Structural hides
   applyPortalHides();
+}
+
+function buildPortalThemeCSS(themeName, accent) {
+  // Check if THEMES is available (from themes.js)
+  if (typeof THEMES === 'undefined' || !THEMES[themeName]) {
+    console.warn('Theme not found:', themeName, 'Using defaults');
+    return '';
+  }
+  
+  const theme = THEMES[themeName];
+  const colors = theme.colors;
+  
+  // Determine if theme is light or dark
+  const isLight = colors.bg === '#f8f9ff' || colors.text.startsWith('#1');
+  const textRGB = isLight ? '0,0,0' : '255,255,255';
+  
+  // Portal-specific CSS
+  const css = `
+/* ═══ PORTAL THEME: ${themeName} ═══ */
+:root {
+  --portal-bg: ${colors.bg};
+  --portal-bg1: ${colors.bg1};
+  --portal-bg2: ${colors.bg2};
+  --portal-bg3: ${colors.bg3};
+  --portal-text: ${colors.text};
+  --portal-muted: ${colors.muted};
+  --portal-accent: ${accent};
+}
+
+/* Base */
+html, body { 
+  background: var(--portal-bg) !important;
+  color: var(--portal-text) !important;
+}
+
+/* Main containers */
+main, #main, [role="main"], .container, .container-fluid {
+  background: var(--portal-bg) !important;
+  color: var(--portal-text) !important;
+}
+
+/* Cards & sections */
+.card, .well, .panel, .box, .section {
+  background: var(--portal-bg2) !important;
+  border-color: rgba(${textRGB}, 0.1) !important;
+  color: var(--portal-text) !important;
+}
+
+.card-body, .well-body, .panel-body {
+  background: var(--portal-bg2) !important;
+  color: var(--portal-text) !important;
+}
+
+/* Text elements */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--portal-text) !important;
+}
+
+p, span, div, label {
+  color: var(--portal-text) !important;
+}
+
+a {
+  color: var(--portal-accent) !important;
+}
+
+a:hover {
+  opacity: 0.8;
+}
+
+/* Bookmarks */
+.bookmark {
+  background: var(--portal-bg2) !important;
+  border-color: rgba(${textRGB}, 0.1) !important;
+  color: var(--portal-text) !important;
+}
+
+.bookmark-title {
+  color: var(--portal-text) !important;
+}
+
+.bookmark:hover {
+  background: var(--portal-bg3) !important;
+  border-color: var(--portal-accent) !important;
+}
+
+/* Announcements */
+.announcement {
+  background: var(--portal-bg2) !important;
+  border-color: rgba(${textRGB}, 0.1) !important;
+  color: var(--portal-text) !important;
+}
+
+.announcement--high {
+  border-left-color: #ef4444 !important;
+  background: rgba(239, 68, 68, 0.1) !important;
+}
+
+/* Navbar */
+.navbar, nav, header, .fixed-top {
+  background: rgba(var(--portal-bg), 0.95) !important;
+  backdrop-filter: blur(12px) !important;
+  border-bottom: 1px solid rgba(${textRGB}, 0.1) !important;
+  color: var(--portal-text) !important;
+}
+
+.navbar-brand, .site-name {
+  color: var(--portal-text) !important;
+}
+
+.nav-link {
+  color: var(--portal-muted) !important;
+}
+
+.nav-link:hover, .nav-link.active {
+  color: var(--portal-accent) !important;
+}
+
+/* Inputs & forms */
+input, textarea, select {
+  background: var(--portal-bg2) !important;
+  color: var(--portal-text) !important;
+  border-color: rgba(${textRGB}, 0.15) !important;
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: var(--portal-accent) !important;
+}
+
+/* Buttons */
+button, .btn {
+  background: var(--portal-accent) !important;
+  color: white !important;
+  border-color: var(--portal-accent) !important;
+}
+
+button:hover, .btn:hover {
+  opacity: 0.9 !important;
+}
+
+/* Tables */
+table, th, td {
+  border-color: rgba(${textRGB}, 0.1) !important;
+  color: var(--portal-text) !important;
+}
+
+th {
+  background: var(--portal-bg3) !important;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--portal-bg1);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--portal-accent);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  opacity: 0.8;
+}
+`;
+
+  return css;
 }
 
 function applyPortalHides() {
@@ -992,27 +1166,61 @@ body.cce-dark .tertiary-navigation {
 //  PORTAL HOME
 // ══════════════════════════════════════════════════
 function initHome() {
-  applyCustomCSS(); applyPortalTheme();
+  console.log('initHome: Starting...');
+  applyCustomCSS(); 
+  applyPortalTheme();
+  applyPortalHides();  // Ensure hides are applied on home page too
+  
   // Try to mount immediately; if #section-plannings doesn't exist yet, wait for it with a simple retry
   if (!mountHome()) {
+    console.log('initHome: #section-plannings not found, waiting...');
     let retries = 0;
     const waitForSection = setInterval(() => {
       retries++;
-      if (mountHome() || retries>20) clearInterval(waitForSection);
+      console.log(`initHome: Retry ${retries}/20 for #section-plannings`);
+      if (mountHome() || retries > 20) {
+        clearInterval(waitForSection);
+        if (retries > 20) console.warn('initHome: Timeout waiting for #section-plannings');
+      }
     }, 500);
   }
 }
 
 function mountHome() {
-  if (!enabled) return false;
-  const section = document.querySelector('#section-plannings'); if (!section) return false;
-  if (!document.getElementById('cce-agenda')) { injectCSS(); buildShell(section); }
+  console.log('mountHome: Checking...');
+  if (!enabled) {
+    console.log('mountHome: Extension disabled');
+    return false;
+  }
+  
+  const section = document.querySelector('#section-plannings'); 
+  if (!section) {
+    console.log('mountHome: #section-plannings not found');
+    return false;
+  }
+  
+  console.log('mountHome: Found #section-plannings');
+  
+  if (!document.getElementById('cce-agenda')) { 
+    console.log('mountHome: Building shell');
+    injectDashboardCSS(); 
+    buildShell(section); 
+  }
+  
   hideFC();
+  
   const fc = document.querySelector('#planning.fc, .fc');
-  if (fc &&!agendaInterval) {
-    // Initial load:sync and render once
+  console.log('mountHome: FC element found:', !!fc);
+  
+  if (fc && !agendaInterval) {
+    console.log('mountHome: Syncing events from FC');
+    // Initial load: sync and render once
     syncFromFC();
-    chrome.storage.local.get(['agendaEvents'], res => renderFromEvents(res.agendaEvents || [], readFCTitle()));
+    chrome.storage.local.get(['agendaEvents'], res => {
+      console.log('mountHome: Got agendaEvents:', res.agendaEvents?.length || 0);
+      renderFromEvents(res.agendaEvents || [], readFCTitle());
+    });
+    
     // Then update every 10 minutes only
     agendaInterval = setInterval(() => {
       if (!enabled || _mutationPaused) return;
@@ -1020,14 +1228,50 @@ function mountHome() {
       chrome.storage.local.get(['agendaEvents'], res => renderFromEvents(res.agendaEvents || [], readFCTitle()));
     }, 10 * 60 * 1000);
   }
+  
   return true;
 }
 
 // ── FC ──
 function waitForFC() {
-  const ok = () => { const fc = document.querySelector('.fc'); const has = fc && (fc.querySelector('.fc-list-event') || fc.querySelector('.fc-event') || fc.querySelector('.fc-timegrid-event')); if (has) { initAgendaPage(); return true; } return false; };
-  if (ok()) return; fcObserver?.disconnect(); fcObserver = new MutationObserver(() => { if (ok()) { fcObserver.disconnect(); fcObserver = null; } });
-  fcObserver.observe(document.body, { childList:true, subtree:true }); setTimeout(ok, 1000);
+  console.log('waitForFC: Looking for FullCalendar...');
+  
+  const ok = () => { 
+    const fc = document.querySelector('.fc'); 
+    console.log('waitForFC check - FC element found:', !!fc);
+    if (!fc) return false;
+    
+    const hasEvents = fc.querySelector('.fc-list-event') || 
+                      fc.querySelector('.fc-event') || 
+                      fc.querySelector('.fc-timegrid-event');
+    console.log('waitForFC check - FC has events:', !!hasEvents);
+    
+    if (hasEvents) { 
+      console.log('waitForFC: Ready!');
+      initAgendaPage(); 
+      return true; 
+    } 
+    return false; 
+  };
+  
+  if (ok()) return;
+  
+  fcObserver?.disconnect(); 
+  fcObserver = new MutationObserver(() => { 
+    if (ok()) { 
+      fcObserver.disconnect(); 
+      fcObserver = null; 
+    } 
+  });
+  
+  console.log('waitForFC: Starting MutationObserver');
+  fcObserver.observe(document.body, { childList:true, subtree:true }); 
+  
+  // Retry after 1.5s
+  setTimeout(() => {
+    console.log('waitForFC: Retry check after 1.5s');
+    ok();
+  }, 1500);
 }
 
 function initAgendaPage() {
