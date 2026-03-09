@@ -1536,28 +1536,28 @@ function injectDashboardCSS() {
 .cce-room { color: #86efac; font-weight: 700; font-size: 13px; letter-spacing: 0.2px; }
 .cce-name { font-weight: 700; color: #f1f5f9; font-size: 14px; letter-spacing: 0.1px; }
 
-.cce-we-time { font-size: 10px; font-weight: 700; color: rgba(255, 255, 255, .85); font-family: 'SF Mono', monospace; margin-bottom: 2px }
-.cce-we-name { font-size: 11px; font-weight: 700; color: #fff; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
-.cce-we-room { font-size: 10px; color: rgba(255, 255, 255, .65); margin-top: 2px }
-.cce-we-prof { font-size: 9px; color: rgba(255, 255, 255, .45); font-style: italic }
-.cce-month { border: 1px solid rgba(255, 255, 255, .06); border-radius: 16px; overflow: hidden; background: rgba(255, 255, 255, .012) }
-.cce-month-lbl { text-align: center; font-size: 16px; font-weight: 800; color: #f1f5f9; padding: 14px 0 6px; letter-spacing: -.3px }
-.cce-month-head { display: grid; grid-template-columns: repeat(7, 1fr); border-bottom: 1px solid rgba(255, 255, 255, .08); background: rgba(255, 255, 255, .025) }
-.cce-month-head div { text-align: center; padding: 8px 0; font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1px }
+.cce-we-time { font-size: 11px; font-weight: 800; color: #a78bfa; font-family: 'SF Mono', 'Courier New', monospace; margin-bottom: 3px; letter-spacing: 0.3px; }
+.cce-we-name { font-size: 12px; font-weight: 700; color: #e0e7ff; line-height: 1.35; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cce-we-room { font-size: 11px; color: #86efac; margin-top: 2px; font-weight: 600; }
+.cce-we-prof { font-size: 10px; color: rgba(255, 255, 255, .55); margin-top: 1px; }
+.cce-month { border: 1px solid rgba(99, 102, 241, 0.15); border-radius: 16px; overflow: hidden; background: linear-gradient(135deg, rgba(99, 102, 241, 0.03), rgba(255, 255, 255, 0.005)); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); }
+.cce-month-lbl { text-align: center; font-size: 18px; font-weight: 800; color: #e0e7ff; padding: 16px 0 8px; letter-spacing: -0.5px; text-transform: capitalize; }
+.cce-month-head { display: grid; grid-template-columns: repeat(7, 1fr); border-bottom: 2px solid rgba(99, 102, 241, 0.1); background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(99, 102, 241, 0.03)); }
+.cce-month-head div { text-align: center; padding: 10px 0; font-size: 11px; font-weight: 800; color: #818cf8; text-transform: uppercase; letter-spacing: 1.2px; }
 .cce-month-grid { display: grid; grid-template-columns: repeat(7, 1fr) }
-.cce-mc { min-height: 72px; border-right: 1px solid rgba(255, 255, 255, .04); border-bottom: 1px solid rgba(255, 255, 255, .04); padding: 6px; display: flex; flex-direction: column; gap: 3px; transition: all .18s; position: relative }
-.cce-mc: nth-child(7n) { border-right: none }
-.cce-mc.empty { background: rgba(0, 0, 0, .08); cursor: default }
-.cce-mc.has-evs { cursor: pointer }
-.cce-mc.has-evs:hover { background: rgba(99, 102, 241, .06) }
-.cce-mc.today { background: rgba(99, 102, 241, .05) }
-.cce-mc.sel { background: rgba(99, 102, 241, .1)!important; box-shadow: inset 0 0 0 2px rgba(99, 102, 241, .35) }
-.cce-mc.conflict { box-shadow: inset 0-2px 0 0 rgba(239, 68, 68, .5) }
-.cce-mc-n { font-size: 13px; font-weight: 700; color: #94a3b8; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; border-radius: 7px }
-.tnow { background: linear-gradient(135deg, #6366f1, #4f46e5)!important; color: #fff!important; box-shadow: 0 2px 8px rgba(99, 102, 241, .3) }
-.cce-mc-dots { display: flex; gap: 3px; flex-wrap: wrap }
-.cce-mc-dot { width: 7px; height: 7px; border-radius: 50 % }
-.cce-mc-cnt { font-size: 9px; font-weight: 600; color: #64748b; margin-top: auto }
+.cce-mc { min-height: 80px; border-right: 1px solid rgba(99, 102, 241, 0.08); border-bottom: 1px solid rgba(99, 102, 241, 0.08); padding: 8px; display: flex; flex-direction: column; gap: 4px; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); position: relative; background: linear-gradient(135deg, rgba(255, 255, 255, 0.01), transparent); }
+.cce-mc:nth-child(7n) { border-right: none }
+.cce-mc.empty { background: rgba(0, 0, 0, 0.1); cursor: default }
+.cce-mc.has-evs { cursor: pointer; }
+.cce-mc.has-evs:hover { background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(99, 102, 241, 0.04)); border-color: rgba(99, 102, 241, 0.2); }
+.cce-mc.today { background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(99, 102, 241, 0.03)); border: 1px solid rgba(99, 102, 241, 0.15); }
+.cce-mc.sel { background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(99, 102, 241, 0.08))!important; box-shadow: inset 0 0 0 2px rgba(99, 102, 241, 0.4), 0 0 16px rgba(99, 102, 241, 0.2); }
+.cce-mc.conflict { box-shadow: inset 0 -3px 0 0 rgba(239, 68, 68, 0.6); background: rgba(239, 68, 68, 0.04); }
+.cce-mc-n { font-size: 14px; font-weight: 800; color: #cbd5e1; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 8px; background: rgba(255, 255, 255, 0.03); transition: all 0.2s; }
+.tnow { background: linear-gradient(135deg, #818cf8, #6366f1)!important; color: #fff!important; box-shadow: 0 4px 12px rgba(129, 140, 248, 0.4); font-weight: 800; }
+.cce-mc-dots { display: flex; gap: 3px; flex-wrap: wrap; }
+.cce-mc-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(99, 102, 241, 0.7); transition: all 0.2s; }
+.cce-mc-cnt { font-size: 10px; font-weight: 700; color: #a78bfa; margin-top: auto; }
 .cce-month-detail { padding: 0; overflow: hidden; transition: all .3s ease }
 .cce-month-detail: not(: empty) { padding: 14px; border-top: 1px solid rgba(99, 102, 241, .15); background: rgba(99, 102, 241, .02) }
 .cce-md-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid rgba(255, 255, 255, .06) }
