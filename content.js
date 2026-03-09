@@ -1349,21 +1349,21 @@ function buildListView(events) {
   const cf = detectConflicts(events), ts = new Date().toISOString().slice(0, 10), gr = {};
   events.forEach(ev => { (gr[ev.date] = gr[ev.date] || []).push(ev); });
   for (const date of Object.keys(gr).sort()) {
-    const d = new Date(`${ date } T12:00:00`), iT = date === ts;
-    const dd = document.createElement('div'); dd.className = `cce-day${ iT ? ' is-today' : '' } `;
+    const d = new Date(`${date}T12:00:00`), iT = date === ts;
+    const dd = document.createElement('div'); dd.className = `cce-day${iT ? ' is-today' : ''}`;
     const dh = document.createElement('div'); dh.className = 'cce-day-head';
-    setH(dh, `< span class="cce-day-name" > ${ cap(d.toLocaleDateString('fr-FR', { weekday: 'long' })) }</span> ${ iT ? '<span class="cce-today-pill">Aujourd\'hui</span>' : '' } <span class="cce-day-date">${d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</span>`);
+    setH(dh, `<span class="cce-day-name">${cap(d.toLocaleDateString('fr-FR', { weekday: 'long' }))}</span>${iT ? '<span class="cce-today-pill">Aujourd\'hui</span>' : ''}<span class="cce-day-date">${d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</span>`);
     dd.appendChild(dh);
     for (const ev of gr[date]) {
       const s = getSetting(ev.courseName), col = s?.color || null, p = ev.parsed || {}, iC = cf.has(ev);
-      const card = document.createElement('div'); card.className = `cce-card${ iC ? ' conflict' : '' } `; card.dataset.original = ev.original; card.dataset.dateLabel = d.toLocaleDateString('fr-FR', { day:'numeric', month:'long', year:'numeric' });
-      card.style.background = col ? rgba(col, 0.1):'rgba(255,255,255,.025)'; card.style.borderLeft = `3px solid ${ col || 'rgba(255,255,255,.08)' } `;
-      const te = document.createElement('div'); te.className = `cce-time${ iC ? ' conflict' : '' } `; te.textContent = (iC ? '⚠ ':'') + ev.timeText;
-      const dot = document.createElement('div'); dot.className = 'cce-dot'; if (col) { dot.style.background = col; dot.style.boxShadow = `0 0 8px ${ rgba(col, 0.4) } `; }
+      const card = document.createElement('div'); card.className = `cce-card${iC ? ' conflict' : ''}`; card.dataset.original = ev.original; card.dataset.dateLabel = d.toLocaleDateString('fr-FR', { day:'numeric', month:'long', year:'numeric' });
+      card.style.background = col ? rgba(col, 0.1):'rgba(255,255,255,.025)'; card.style.borderLeft = `3px solid ${col || 'rgba(255,255,255,.08)'}`;
+      const te = document.createElement('div'); te.className = `cce-time${iC ? ' conflict' : ''}`; te.textContent = (iC ? '⚠ ':'') + ev.timeText;
+      const dot = document.createElement('div'); dot.className = 'cce-dot'; if (col) { dot.style.background = col; dot.style.boxShadow = `0 0 8px ${rgba(col, 0.4)}`; }
       const body = document.createElement('div'); body.className = 'cce-body'; body.appendChild(mkBadge(p.type));
       if (p.room) { const r = document.createElement('span'); r.className = 'cce-room'; r.textContent = p.room; const sep = document.createElement('span'); sep.className = 'cce-sep'; sep.textContent = '·'; body.appendChild(r); body.appendChild(sep); }
       const nm = document.createElement('span'); nm.className = 'cce-name'; nm.textContent = ev.courseName; body.appendChild(nm);
-      if (p.prof) { const pr = document.createElement('span'); pr.className = 'cce-prof'; pr.textContent = `— ${ p.prof } `; body.appendChild(pr); }
+      if (p.prof) { const pr = document.createElement('span'); pr.className = 'cce-prof'; pr.textContent = `— ${p.prof}`; body.appendChild(pr); }
       card.append(te, dot, body); if (ev.link) { const a = document.createElement('a'); a.href = ev.link; a.target = '_blank'; a.className = 'cce-link'; a.textContent = '🔗'; card.appendChild(a); }
       card.addEventListener('click', e => { if (!e.target.closest('.cce-link')) openModal(card); });
       dd.appendChild(card);
@@ -1373,7 +1373,7 @@ function buildListView(events) {
 }
 
 const GS = 7, GE = 20, HPX = 64;
-function getWeekDates(events) { if (!events.length) return []; const first = new Date(`${ events[0].date } T12:00:00`), dow = first.getDay(), mon = new Date(first); mon.setDate(first.getDate()-(dow === 0 ? 6:dow-1)); return Array.from({ length:6 }, (_, i) => { const d = new Date(mon); d.setDate(mon.getDate() + i); return d.toISOString().slice(0, 10); }); }
+function getWeekDates(events) { if (!events.length) return []; const first = new Date(`${events[0].date}T12:00:00`), dow = first.getDay(), mon = new Date(first); mon.setDate(first.getDate()-(dow === 0 ? 6:dow-1)); return Array.from({ length:6 }, (_, i) => { const d = new Date(mon); d.setDate(mon.getDate() + i); return d.toISOString().slice(0, 10); }); }
 function layoutDay(de) { if (!de.length) return de; const s = [...de].sort((a, b) => a.sh * 60 + a.sm-b.sh * 60-b.sm); const gs = []; let cur = [s[0]], ce = s[0].eh * 60 + s[0].em; for (let i = 1; i <s.length; i++) { const eS = s[i].sh * 60 + s[i].sm; if (eS <ce) { cur.push(s[i]); ce = Math.max(ce, s[i].eh * 60 + s[i].em); } else { gs.push(cur); cur = [s[i]]; ce = s[i].eh * 60 + s[i].em; } } gs.push(cur); gs.forEach(g => { const cols = []; g.forEach(ev => { const eS = ev.sh * 60 + ev.sm; let p = false; for (let c = 0; c <cols.length; c++) { if (eS>= cols[c]) { cols[c] = ev.eh * 60 + ev.em; ev._col = c; p = true; break; } } if (!p) { ev._col = cols.length; cols.push(ev.eh * 60 + ev.em); } }); g.forEach(ev => ev._cols = cols.length); }); return s; }
 
 function buildWeekView(events) {
@@ -1384,10 +1384,10 @@ function buildWeekView(events) {
   const now = new Date(), nt = ((now.getHours()-GS) * 60 + now.getMinutes()) * (HPX / 60), sn = now.getHours()>= GS && now.getHours() <GE;
   const wk = document.createElement('div'); wk.className = 'cce-week';
   const hd = document.createElement('div'); hd.className = 'cce-wk-head'; setH(hd, '<div class="cce-wk-gutter"></div>');
-  dates.forEach(d => { const dt = new Date(`${ d } T12:00:00`), iT = d === ts; addH(hd, ` <div class="cce-wk-dh${iT ? ' today':''}" ><span class="cce-wk-dn">${cap(dt.toLocaleDateString('fr-FR', { weekday:'short' }))}</span><span class="cce-wk-dd${iT ? ' today-n':''}">${dt.getDate()}</span></div> `); });
+  dates.forEach(d => { const dt = new Date(`${d}T12:00:00`), iT = d === ts; addH(hd, `<div class="cce-wk-dh${iT ? ' today':''}"><span class="cce-wk-dn">${cap(dt.toLocaleDateString('fr-FR', { weekday:'short' }))}</span><span class="cce-wk-dd${iT ? ' today-n':''}">${dt.getDate()}</span></div>`); });
   wk.appendChild(hd); const body = document.createElement('div'); body.className = 'cce-wk-body';
   const times = document.createElement('div'); times.className = 'cce-wk-times';
-  for (let h = GS; h <GE; h++) { const l = document.createElement('div'); l.className = 'cce-wt'; l.style.height = `${ HPX } px`; l.textContent = `${ p2(h) }:00`; times.appendChild(l); }
+  for (let h = GS; h <GE; h++) { const l = document.createElement('div'); l.className = 'cce-wt'; l.style.height = `${HPX}px`; l.textContent = `${p2(h)}:00`; times.appendChild(l); }
   body.appendChild(times); const grid = document.createElement('div'); grid.className = 'cce-wk-grid'; grid.style.height = `${ gH } px`;
   for (let h = GS; h <GE; h++) { const l = document.createElement('div'); l.className = 'cce-wk-line'; l.style.top = `${ (h-GS) * HPX } px`; grid.appendChild(l); }
   dates.forEach(d => {
@@ -1506,10 +1506,11 @@ function injectDashboardCSS() {
 #cce-agenda { color: #e2e8f0; font-family: 'Inter', system-ui, sans-serif; max-width: 1140px; margin: 0 auto; padding: 32px 20px; animation: fadeIn 0.4s ease-out; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-.cce-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; gap: 16px; flex-wrap: wrap; background: rgba(255, 255, 255, 0.02); padding: 16px 20px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.05); }
+.cce-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; gap: 16px; flex-wrap: wrap; background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(139, 92, 246, 0.02)); padding: 18px 24px; border-radius: 16px; border: 1px solid rgba(99, 102, 241, 0.15); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
 .cce-bar-nav { display: flex; align-items: center; gap: 8px }
-.cce-btn { background: rgba(255, 255, 255, .05); border: 1px solid rgba(255, 255, 255, .08); color: #94a3b8; border-radius: 12px; padding: 10px 16px; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); font-family: inherit; }
-.cce-btn:hover { background: rgba(99, 102, 241, .15); color: #fff; border-color: rgba(99, 102, 241, .4); transform: translateY(-1px); }
+.cce-btn { background: rgba(255, 255, 255, .06); border: 1px solid rgba(99, 102, 241, .12); color: #cbd5e1; border-radius: 11px; padding: 10px 18px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); font-family: inherit; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
+.cce-btn:hover { background: linear-gradient(135deg, rgba(99, 102, 241, .2), rgba(99, 102, 241, .12)); color: #e0e7ff; border-color: rgba(99, 102, 241, .5); transform: translateY(-2px); box-shadow: 0 6px 12px rgba(99, 102, 241, 0.2); }
+.cce-btn:active { transform: translateY(0); box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
 .cce-ico { width: 40px; padding: 10px 0; text-align: center; font-size: 18px }
 .cce-today-btn { background: linear-gradient(135deg, #6366f1, #4f46e5); border-color: transparent; color: #fff; box-shadow: 0 4px 15px rgba(99, 102, 241, .3); }
 .cce-bar-title { font-size: 22px; font-weight: 800; letter-spacing: -.8px; color: #fff; margin: 0 }
@@ -1518,19 +1519,22 @@ function injectDashboardCSS() {
 .cce-vbtn.active { background: rgba(255, 255, 255, 0.08); color: #fff; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); }
 
 #cce-banner { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 34px }
-.cce-bc { background: rgba(255, 255, 255, .03); border: 1px solid rgba(255, 255, 255, .06); border-radius: 18px; padding: 20px 24px; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
-.cce-bc:hover { border-color: rgba(99, 102, 241, 0.3); transform: translateY(-3px); background: rgba(255, 255, 255, 0.04); }
-.cce-bc-cur { border-left: 4px solid #6366f1; background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), transparent); }
-.cce-bc-nxt { border-left: 4px solid #8b5cf6; background: linear-gradient(135deg, rgba(139, 92, 246, 0.08), transparent); }
+.cce-bc { background: linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01)); border: 1px solid rgba(99, 102, 241, 0.15); border-radius: 16px; padding: 20px 24px; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.05); }
+.cce-bc:hover { border-color: rgba(99, 102, 241, 0.35); transform: translateY(-4px); background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(99, 102, 241, 0.03)); box-shadow: 0 12px 24px rgba(99, 102, 241, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.08); }
+.cce-bc-cur { border-left: 5px solid #818cf8; background: linear-gradient(135deg, rgba(129, 140, 248, 0.12), rgba(99, 102, 241, 0.05)); }
+.cce-bc-nxt { border-left: 5px solid #a78bfa; background: linear-gradient(135deg, rgba(167, 139, 250, 0.12), rgba(139, 92, 246, 0.05)); }
 
 .cce-day { margin-bottom: 30px }
-.cce-day-head { display: flex; align-items: center; gap: 12px; padding: 12px 18px; border-bottom: 1px solid rgba(255, 255, 255, .05); margin-bottom: 16px; background: rgba(255, 255, 255, 0.01); border-radius: 12px 12px 0 0; }
-.cce-day-name { font-size: 16px; font-weight: 800; color: #fff }
-.cce-card { background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 14px; margin-bottom: 6px; padding: 14px 18px; transition: all 0.25s; }
-.cce-card:hover { background: rgba(255, 255, 255, 0.05); border-color: rgba(99, 102, 241, 0.2); transform: translateX(6px); }
-.cce-time { color: #818cf8; font-weight: 800; font-family: 'SF Mono', monospace; min-width: 110px; }
-.cce-room { color: #a5b4fc; font-weight: 800; }
-.cce-name { font-weight: 700; color: #f1f5f9; }
+.cce-day-head { display: flex; align-items: center; gap: 12px; padding: 14px 18px; background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(99, 102, 241, 0.03)); border-bottom: 2px solid rgba(99, 102, 241, 0.2); margin-bottom: 18px; border-radius: 12px; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.1); transition: all 0.3s ease; }
+.cce-day-head:hover { border-bottom-color: rgba(99, 102, 241, 0.3); box-shadow: 0 8px 16px rgba(99, 102, 241, 0.15); background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(99, 102, 241, 0.05)); }
+.cce-day-name { font-size: 17px; font-weight: 800; color: #e0e7ff; letter-spacing: -0.2px; text-transform: capitalize; }
+.cce-card { background: linear-gradient(135deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01)); border: 1px solid rgba(99, 102, 241, 0.1); border-radius: 12px; margin-bottom: 8px; padding: 14px 18px; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05); position: relative; overflow: hidden; }
+.cce-card::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent); transition: left 0.5s; }
+.cce-card:hover::before { left: 100%; }
+.cce-card:hover { background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(99, 102, 241, 0.06)); border-color: rgba(99, 102, 241, 0.3); transform: translateX(8px) translateY(-2px); box-shadow: 0 8px 20px rgba(99, 102, 241, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08); }
+.cce-time { color: #a78bfa; font-weight: 800; font-family: 'SF Mono', 'Courier New', monospace; min-width: 110px; letter-spacing: 0.3px; font-size: 14px; }
+.cce-room { color: #86efac; font-weight: 700; font-size: 13px; letter-spacing: 0.2px; }
+.cce-name { font-weight: 700; color: #f1f5f9; font-size: 14px; letter-spacing: 0.1px; }
 
 .cce-we-time { font-size: 10px; font-weight: 700; color: rgba(255, 255, 255, .85); font-family: 'SF Mono', monospace; margin-bottom: 2px }
 .cce-we-name { font-size: 11px; font-weight: 700; color: #fff; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
