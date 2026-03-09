@@ -20,7 +20,7 @@ function debounce(fn, ms) {
 
 const defMoodle = () => ({ dark: true, accentColor: '#6366f1', compactCards: false, hideBanners: false, noAnimations: false, timeline: true, calendar: true, recent: true, showNextTimeline: true, hideNavbar: false, hideSidebar: false, hidePageHeader: false, hideNotifs: false, hideEditMode: false, hideFooter: false, showCourseCategory: true, showFavourite: true, showPagination: true });
 
-const defPortal = () => ({ theme: 'default', accentColor: '#6366f1', hideNavbar: false, hideFooter: false, hideSidebar: false, cleanSlate: true, showBkmPedagogic: true, showBkmInfos: true, showBkmTools: true, showBkmDepartment: true, showBkmCloud: true, showBkmPersonal: true });
+const defPortal = () => ({ theme: 'darkPremium', accentColor: '#6366f1', hideNavbar: false, hideFooter: false, hideSidebar: false, cleanSlate: false, showBkmPedagogic: true, showBkmInfos: true, showBkmTools: true, showBkmDepartment: true, showBkmCloud: true, showBkmPersonal: true });
 
 function normPS(s) {
   const d = defPortal();
@@ -168,28 +168,31 @@ function applyCustomCSS() {
 // ── Portal Theme ──
 function applyPortalTheme() {
   if (!isPortal) return;
-  const theme = portalSettings.theme || 'default';
+  
+  const themeName = portalSettings.theme || 'default';
   const accent = portalSettings.accentColor || '#6366f1';
 
-  // Remove old theme classes
-  document.body.classList.remove('cce-portal-dark', 'cce-portal-light');
-
-  // Inject/update theme CSS
   let el = document.getElementById('cce-portal-theme');
-  if (!el) { el = document.createElement('style'); el.id = 'cce-portal-theme'; document.head.appendChild(el); }
+  if (!el) { 
+    el = document.createElement('style'); 
+    el.id = 'cce-portal-theme'; 
+    document.head.appendChild(el); 
+  }
 
-  if (theme === 'default') { el.textContent = ''; return; }
-
-  const acc = accent;
-  const accRgb = hexToRgb(acc);
-  const accStr = accRgb ? `${accRgb.r},${accRgb.g},${accRgb.b}` : '99,102,241';
-
-  if (theme === 'dark') {
-    document.body.classList.add('cce-portal-dark');
-    el.textContent = portalDarkCSS(acc, accStr);
-  } else if (theme === 'light') {
-    document.body.classList.add('cce-portal-light');
-    el.textContent = portalLightCSS(acc, accStr);
+  // Check if THEMES is available (from themes.js)
+  if (typeof THEMES !== 'undefined' && THEMES[themeName]) {
+    const theme = THEMES[themeName];
+    try {
+      el.textContent = theme.apply(accent);
+    } catch (err) {
+      console.error('Error applying theme:', err);
+      el.textContent = '';
+    }
+  } else if (themeName === 'default') {
+    el.textContent = '';
+  } else {
+    console.warn('Theme not found:', themeName);
+    el.textContent = '';
   }
 
   // Structural hides

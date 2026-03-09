@@ -276,10 +276,10 @@
   <!-- ══ PORTAIL ══ -->
   <div class="panel" id="tab-portal" role="tabpanel">
 
-    <div class="section-title">Thème</div>
+    <div class="section-title">Thème prédéfini</div>
     <div class="theme-grid">
-      <button class="theme-btn active" data-theme="default">
-        <div class="theme-preview tp-default">
+      <button class="theme-btn active" data-theme="darkPremium">
+        <div class="theme-preview tp-dark-premium">
           <div class="tp-bar"></div>
           <div class="tp-lines">
             <div></div>
@@ -287,10 +287,10 @@
             <div></div>
           </div>
         </div>
-        <span>Défaut</span>
+        <span>Dark Premium 💎</span>
       </button>
-      <button class="theme-btn" data-theme="light">
-        <div class="theme-preview tp-light">
+      <button class="theme-btn" data-theme="lightClean">
+        <div class="theme-preview tp-light-clean">
           <div class="tp-bar"></div>
           <div class="tp-lines">
             <div></div>
@@ -298,10 +298,10 @@
             <div></div>
           </div>
         </div>
-        <span>Clair ☀️</span>
+        <span>Light Clean ☀️</span>
       </button>
-      <button class="theme-btn" data-theme="dark">
-        <div class="theme-preview tp-dark">
+      <button class="theme-btn" data-theme="warmOrange">
+        <div class="theme-preview tp-warm-orange">
           <div class="tp-bar"></div>
           <div class="tp-lines">
             <div></div>
@@ -309,14 +309,55 @@
             <div></div>
           </div>
         </div>
-        <span>Sombre 🌙</span>
+        <span>Warm Orange 🧡</span>
       </button>
+      <button class="theme-btn" data-theme="techGreen">
+        <div class="theme-preview tp-tech-green">
+          <div class="tp-bar"></div>
+          <div class="tp-lines">
+            <div></div>
+            <div></div>
+            <div></div>
+          </div>
+        </div>
+        <span>Tech Green 💻</span>
+      </button>
+      <button class="theme-btn" data-theme="mysticPurple">
+        <div class="theme-preview tp-mystic-purple">
+          <div class="tp-bar"></div>
+          <div class="tp-lines">
+            <div></div>
+            <div></div>
+            <div></div>
+          </div>
+        </div>
+        <span>Mystic Purple 🔮</span>
+      </button>
+    </div>
+
+    <div class="section-title mt">Couleur d'accent</div>
+    <div class="accent-grid">
+      <button class="accent-btn" data-accent="indigo" style="background: linear-gradient(135deg, #4f46e5, #312e81);" title="Indigo"></button>
+      <button class="accent-btn" data-accent="purple" style="background: linear-gradient(135deg, #a855f7, #5b21b6);" title="Purple"></button>
+      <button class="accent-btn" data-accent="pink" style="background: linear-gradient(135deg, #ec4899, #831843);" title="Pink"></button>
+      <button class="accent-btn" data-accent="red" style="background: linear-gradient(135deg, #ef4444, #7f1d1d);" title="Red"></button>
+      <button class="accent-btn" data-accent="orange" style="background: linear-gradient(135deg, #f97316, #7c2d12);" title="Orange"></button>
+      <button class="accent-btn" data-accent="yellow" style="background: linear-gradient(135deg, #eab308, #713f12);" title="Yellow"></button>
+      <button class="accent-btn" data-accent="lime" style="background: linear-gradient(135deg, #84cc16, #3f6212);" title="Lime"></button>
+      <button class="accent-btn" data-accent="green" style="background: linear-gradient(135deg, #22c55e, #15803d);" title="Green"></button>
+      <button class="accent-btn" data-accent="emerald" style="background: linear-gradient(135deg, #10b981, #065f46);" title="Emerald"></button>
+      <button class="accent-btn" data-accent="teal" style="background: linear-gradient(135deg, #14b8a6, #134e4a);" title="Teal"></button>
+      <button class="accent-btn" data-accent="cyan" style="background: linear-gradient(135deg, #06b6d4, #164e63);" title="Cyan"></button>
+      <button class="accent-btn" data-accent="sky" style="background: linear-gradient(135deg, #0ea5e9, #0c2d4a);" title="Sky"></button>
+      <button class="accent-btn" data-accent="blue" style="background: linear-gradient(135deg, #3b82f6, #1e3a8a);" title="Blue"></button>
+      <button class="accent-btn" data-accent="rose" style="background: linear-gradient(135deg, #f43f5e, #500724);" title="Rose"></button>
+      <button class="accent-btn active" data-accent="custom" style="background: linear-gradient(135deg, #6366f1, #312e81);" title="Custom"></button>
     </div>
 
     <div class="row-setting">
       <div class="row-info">
-        <span class="row-label">Couleur d'accent</span>
-        <span class="row-desc">Boutons, liens, surbrillances</span>
+        <span class="row-label">Couleur personnalisée</span>
+        <span class="row-desc">Couleur d'accent personnalisée (avancé)</span>
       </div>
       <input type="color" id="portalAccent" value="#6366f1" class="color-pill">
     </div>
@@ -424,6 +465,7 @@
     </button>
   </footer>
 
+  <script src="themes.js"></script>
   <script src="popup.js"></script>
 </body>
 

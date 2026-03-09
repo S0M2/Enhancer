@@ -153,6 +153,21 @@ function syncUI() {
   setVal('showBkmCloud', portalSettings.showBkmCloud);
   setVal('showBkmPersonal', portalSettings.showBkmPersonal);
   setActiveThemeBtn(portalSettings.theme);
+  
+  // Set active accent button - find which preset matches the current color
+  let accentFound = false;
+  if (typeof PRESET_ACCENTS !== 'undefined') {
+    for (const [name, hexValue] of Object.entries(PRESET_ACCENTS)) {
+      if (hexValue === portalSettings.accentColor) {
+        setActiveAccentBtn(name, portalSettings.accentColor);
+        accentFound = true;
+        break;
+      }
+    }
+  }
+  if (!accentFound) {
+    setActiveAccentBtn('custom', portalSettings.accentColor);
+  }
 }
 
 function setVal(id, value) {
@@ -494,6 +509,7 @@ function bindMoodleToggles() {
 // ── Portal settings ───────────────────────────────────────
 
 function bindPortalControls() {
+  // Theme buttons
   document.querySelectorAll('.theme-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       portalSettings.theme = btn.dataset.theme;
@@ -501,10 +517,35 @@ function bindPortalControls() {
       scheduleAutoSave();
     });
   });
+  
+  // Accent color buttons
+  document.querySelectorAll('.accent-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const accent = btn.dataset.accent;
+      if (accent === 'custom') {
+        // Focus on the color picker
+        document.getElementById('portalAccent')?.focus();
+      } else {
+        // Get the preset accent color from themes.js if available
+        if (typeof PRESET_ACCENTS !== 'undefined' && PRESET_ACCENTS[accent]) {
+          const accentValue = PRESET_ACCENTS[accent];
+          portalSettings.accentColor = accentValue;
+          document.getElementById('portalAccent').value = accentValue;
+          setActiveAccentBtn(accent, accentValue);
+          scheduleAutoSave();
+        }
+      }
+    });
+  });
+  
+  // Custom color picker
   document.getElementById('portalAccent')?.addEventListener('input', e => {
     portalSettings.accentColor = e.target.value;
+    setActiveAccentBtn('custom', e.target.value);
     scheduleAutoSave();
   });
+  
+  // Hide/show element toggles
   const hideMap = {
     portalHideNavbar: 'hideNavbar',
     portalHideFooter: 'hideFooter',
@@ -527,6 +568,20 @@ function bindPortalControls() {
 function setActiveThemeBtn(theme) {
   document.querySelectorAll('.theme-btn').forEach(b => {
     b.classList.toggle('active', b.dataset.theme === theme);
+  });
+}
+
+function setActiveAccentBtn(accent, value) {
+  document.querySelectorAll('.accent-btn').forEach(btn => {
+    if (btn.dataset.accent === accent) {
+      btn.classList.add('active');
+    } else if (btn.dataset.accent === 'custom' && accent !== 'custom') {
+      btn.classList.remove('active');
+    } else if (btn.dataset.accent === 'custom' && accent === 'custom') {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
   });
 }
 
