@@ -1158,9 +1158,6 @@ body.cce-dark .tertiary-navigation {
 `;
   document.head.appendChild(s);
 }
-`;
-  document.head.appendChild(s);
-}
 
 
 // ══════════════════════════════════════════════════
