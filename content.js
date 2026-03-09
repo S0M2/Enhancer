@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════
-//  ENHANCER — content.js v3.3
+//  ENHANCER — content.js v3.6.0
 // ═══════════════════════════════════════════════
 function setH(el, h) { el.textContent = ''; const dp = new DOMParser().parseFromString(h, 'text/html'); while (dp.body.firstChild) el.appendChild(dp.body.firstChild); }
 function addH(el, h) { const dp = new DOMParser().parseFromString(h, 'text/html'); while (dp.body.firstChild) el.appendChild(dp.body.firstChild); }
@@ -10,8 +10,9 @@ const isHome = isPortal && !location.search.includes('mod=');
 
 let enabled = true, courseSettings = {}, moodleSettings = {}, portalSettings = {}, customCSS = {};
 let knownCourses = new Set(), currentView = 'list';
-let fcReady = false, lastFCHash = '', lastRenderHash = '', agendaObserver = null, moodleObserver = null, fcObserver = null, refreshTimer = null, agendaInterval = null;
-let _mutationPaused = false, lastPersistHash = '';
+let fcReady = false, lastFCHash = '', lastRenderHash = '', lastHomeRenderHash = '', lastPersistHash = '';
+let agendaObserver = null, moodleObserver = null, fcObserver = null, refreshTimer = null, agendaInterval = null;
+let _mutationPaused = false;
 
 function debounce(fn, ms) {
   let t;
@@ -43,10 +44,7 @@ function normPS(s) {
 
 chrome.storage.local.get(['courseSettings', 'knownCourses', 'moodleSettings', 'portalSettings', 'customCSS', 'extensionEnabled'], res => {
   try {
-    if (chrome.runtime.lastError) {
-      console.error('Storage read error:', chrome.runtime.lastError);
-      return;
-    }
+    if (chrome.runtime.lastError) return;
     if (res.courseSettings && typeof res.courseSettings === 'object') courseSettings = res.courseSettings;
     if (Array.isArray(res.knownCourses)) res.knownCourses.forEach(c => knownCourses.add(c));
     moodleSettings = normMS(res.moodleSettings);
@@ -54,33 +52,23 @@ chrome.storage.local.get(['courseSettings', 'knownCourses', 'moodleSettings', 'p
     customCSS = (res.customCSS && typeof res.customCSS === 'object') ? res.customCSS : {};
     enabled = res.extensionEnabled !== false;
     
-    console.log('Enhancer init:', { isMoodle, isPortal, isAgenda, isHome, enabled });
-    
     replaceLogo();
     if (!enabled) return;
     
     if (isMoodle) {
-      console.log('Initializing Moodle');
       initMoodle();
     } else if (isPortal) {
-      console.log('Initializing Portal');
       applyPortalTheme();
       applyPortalHides();
       
       if (isAgenda) {
-        console.log('Initializing Agenda');
         waitForFC();
       } else if (isHome) {
-        console.log('Initializing Home');
         initHome();
-      } else {
-        console.log('Portal page (not agenda/home), applying theme only');
       }
     }
     applyCustomCSS();
-  } catch (err) {
-    console.error('Error initializing Enhancer:', err);
-  }
+  } catch (err) {}
 });
 
 chrome.storage.onChanged.addListener((changes, ns) => {
@@ -195,28 +183,16 @@ function applyPortalTheme() {
   // Build portal-specific theme CSS
   const css = buildPortalThemeCSS(themeName, accent);
   el.textContent = css;
-  
-  console.log('Applied Portal theme:', themeName, 'Accent:', accent);
-  
   // Structural hides
   applyPortalHides();
 }
 
 function buildPortalThemeCSS(themeName, accent) {
-  // Check if THEMES is available (from themes.js)
-  if (typeof THEMES === 'undefined' || !THEMES[themeName]) {
-    console.warn('Theme not found:', themeName, 'Using defaults');
-    return '';
-  }
+  if (typeof THEMES === 'undefined' || !THEMES[themeName]) return '';
   
-  const theme = THEMES[themeName];
-  const colors = theme.colors;
-  
-  // Determine if theme is light or dark
+  const theme = THEMES[themeName], colors = theme.colors;
   const isLight = colors.bg === '#f8f9ff' || colors.text.startsWith('#1');
   const textRGB = isLight ? '0,0,0' : '255,255,255';
-  
-  // Portal-specific CSS
   const css = `
 /* ═══ PORTAL THEME: ${themeName} ═══ */
 :root {
@@ -1195,43 +1171,25 @@ body.cce-dark .tertiary-navigation {
 //  PORTAL HOME
 // ══════════════════════════════════════════════════
 function initHome() {
-  console.log('initHome: Starting...');
   applyCustomCSS(); 
   applyPortalTheme();
   applyPortalHides();  // Ensure hides are applied on home page too
   
-  // Try to mount immediately; if #section-plannings doesn't exist yet, wait for it with a simple retry
+  // Try to mount immediately; if #section-plannings doesn't exist yet, wait for it
   if (!mountHome()) {
-    console.log('initHome: #section-plannings not found, waiting...');
     let retries = 0;
     const waitForSection = setInterval(() => {
       retries++;
-      console.log(`initHome: Retry ${retries}/20 for #section-plannings`);
-      if (mountHome() || retries > 20) {
-        clearInterval(waitForSection);
-        if (retries > 20) console.warn('initHome: Timeout waiting for #section-plannings');
-      }
+      if (mountHome() || retries > 20) clearInterval(waitForSection);
     }, 500);
   }
 }
 
 function mountHome() {
-  console.log('mountHome: Checking...');
-  if (!enabled) {
-    console.log('mountHome: Extension disabled');
-    return false;
-  }
-  
+  if (!enabled) return false;
   const section = document.querySelector('#section-plannings'); 
-  if (!section) {
-    console.log('mountHome: #section-plannings not found');
-    return false;
-  }
-  
-  console.log('mountHome: Found #section-plannings');
-  
-  if (!document.getElementById('cce-agenda')) { 
-    console.log('mountHome: Building shell');
+  if (!section) return false;
+  if (!document.getElementById('cce-agenda')) {
     injectDashboardCSS(); 
     buildShell(section); 
   }
@@ -1239,14 +1197,10 @@ function mountHome() {
   hideFC();
   
   const fc = document.querySelector('#planning.fc, .fc');
-  console.log('mountHome: FC element found:', !!fc);
-  
   if (fc && !agendaInterval) {
-    console.log('mountHome: Syncing events from FC');
     // Initial load: sync and render once
     syncFromFC();
     chrome.storage.local.get(['agendaEvents'], res => {
-      console.log('mountHome: Got agendaEvents:', res.agendaEvents?.length || 0);
       renderFromEvents(res.agendaEvents || [], readFCTitle());
     });
     
@@ -1263,20 +1217,14 @@ function mountHome() {
 
 // ── FC ──
 function waitForFC() {
-  console.log('waitForFC: Looking for FullCalendar...');
-  
   const ok = () => { 
     const fc = document.querySelector('.fc'); 
-    console.log('waitForFC check - FC element found:', !!fc);
     if (!fc) return false;
-    
     const hasEvents = fc.querySelector('.fc-list-event') || 
                       fc.querySelector('.fc-event') || 
                       fc.querySelector('.fc-timegrid-event');
-    console.log('waitForFC check - FC has events:', !!hasEvents);
     
     if (hasEvents) { 
-      console.log('waitForFC: Ready!');
       initAgendaPage(); 
       return true; 
     } 
@@ -1293,14 +1241,10 @@ function waitForFC() {
     } 
   });
   
-  console.log('waitForFC: Starting MutationObserver');
   fcObserver.observe(document.body, { childList:true, subtree:true }); 
   
   // Retry after 1.5s
-  setTimeout(() => {
-    console.log('waitForFC: Retry check after 1.5s');
-    ok();
-  }, 1500);
+  setTimeout(() => { ok(); }, 1500);
 }
 
 function initAgendaPage() {
@@ -1352,7 +1296,6 @@ function buildShell(mt = null) {
 }
 function scheduleRefresh(d = 300) { clearTimeout(refreshTimer); refreshTimer = setTimeout(() => { if (!enabled) return; if (isHome) { syncFromFC(); chrome.storage.local.get(['agendaEvents'], res => renderFromEvents(res.agendaEvents || [], readFCTitle())); } else if (isAgenda) { if (!fcReady) waitForFC(); else refreshAgenda(); } }, Math.max(d, 300)); }
 function refreshAgenda() { if (!enabled) return; const events = readFCEvents(), title = readFCTitle(); const h = hash(JSON.stringify(events) + title + currentView); if (h === lastRenderHash) return; lastRenderHash = h; _mutationPaused = true; const te = document.getElementById('cce-title'); if (te && title) te.textContent = title; events.forEach(ev => { if (isValid(ev.courseName)) knownCourses.add(ev.courseName); }); persistAgenda(events); render(events); requestAnimationFrame(() => { _mutationPaused = false; }); }
-let lastHomeRenderHash = '';
 function renderFromEvents(events = [], title = '') { if (!enabled ||!document.getElementById('cce-agenda')) return; const h = hash(JSON.stringify(events) + title); if (h === lastHomeRenderHash) return; lastHomeRenderHash = h; _mutationPaused = true; const te = document.getElementById('cce-title'); if (te && title) te.textContent = title; events.forEach(ev => { if (isValid(ev?.courseName)) knownCourses.add(ev.courseName); }); render(events); requestAnimationFrame(() => { _mutationPaused = false; }); }
 function render(ev) { buildBanner(ev); if (currentView === 'week') buildWeekView(ev); else if (currentView === 'month') buildMonthView(ev); else buildListView(ev); }
 function detectConflicts(events) { const c = new Set(), bd = {}; events.forEach(ev => { (bd[ev.date] = bd[ev.date] || []).push(ev); }); for (const day of Object.values(bd)) for (let i = 0; i <day.length; i++)for (let j = i + 1; j <day.length; j++) { const [a, b] = [day[i], day[j]]; if (a.sh * 60 + a.sm <b.eh * 60 + b.em && b.sh * 60 + b.sm <a.eh * 60 + a.em) { c.add(a); c.add(b); } } return c; }
@@ -1403,8 +1346,11 @@ function buildListView(events) {
   }
 }
 
+// Week view constants and utilities
 const GS = 7, GE = 20, HPX = 64;
+
 function getWeekDates(events) { if (!events.length) return []; const first = new Date(`${events[0].date}T12:00:00`), dow = first.getDay(), mon = new Date(first); mon.setDate(first.getDate()-(dow === 0 ? 6:dow-1)); return Array.from({ length:6 }, (_, i) => { const d = new Date(mon); d.setDate(mon.getDate() + i); return d.toISOString().slice(0, 10); }); }
+
 function layoutDay(de) { if (!de.length) return de; const s = [...de].sort((a, b) => a.sh * 60 + a.sm-b.sh * 60-b.sm); const gs = []; let cur = [s[0]], ce = s[0].eh * 60 + s[0].em; for (let i = 1; i <s.length; i++) { const eS = s[i].sh * 60 + s[i].sm; if (eS <ce) { cur.push(s[i]); ce = Math.max(ce, s[i].eh * 60 + s[i].em); } else { gs.push(cur); cur = [s[i]]; ce = s[i].eh * 60 + s[i].em; } } gs.push(cur); gs.forEach(g => { const cols = []; g.forEach(ev => { const eS = ev.sh * 60 + ev.sm; let p = false; for (let c = 0; c <cols.length; c++) { if (eS>= cols[c]) { cols[c] = ev.eh * 60 + ev.em; ev._col = c; p = true; break; } } if (!p) { ev._col = cols.length; cols.push(ev.eh * 60 + ev.em); } }); g.forEach(ev => ev._cols = cols.length); }); return s; }
 
 function buildWeekView(events) {
