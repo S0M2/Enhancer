@@ -30,6 +30,7 @@ let moodleSettings = {};
 let portalSettings = {};
 let customCSS = { moodle: '', portal: '' };
 let enabled = true;
+let autoSaveTimer = null;
 
 // ── Bootstrap ─────────────────────────────────────────────
 
@@ -477,10 +478,12 @@ function bindMoodleToggles() {
   Object.entries(toggleMap).forEach(([id, key]) => {
     document.getElementById(id)?.addEventListener('change', e => {
       moodleSettings[key] = e.target.checked;
+      scheduleAutoSave();
     });
   });
   document.getElementById('accentColor')?.addEventListener('input', e => {
     moodleSettings.accentColor = e.target.value;
+    scheduleAutoSave();
   });
 }
 
@@ -491,10 +494,12 @@ function bindPortalControls() {
     btn.addEventListener('click', () => {
       portalSettings.theme = btn.dataset.theme;
       setActiveThemeBtn(btn.dataset.theme);
+      scheduleAutoSave();
     });
   });
   document.getElementById('portalAccent')?.addEventListener('input', e => {
     portalSettings.accentColor = e.target.value;
+    scheduleAutoSave();
   });
   const hideMap = {
     portalHideNavbar: 'hideNavbar',
@@ -510,6 +515,7 @@ function bindPortalControls() {
   Object.entries(hideMap).forEach(([id, key]) => {
     document.getElementById(id)?.addEventListener('change', e => {
       portalSettings[key] = e.target.checked;
+      scheduleAutoSave();
     });
   });
 }
@@ -586,6 +592,7 @@ function bindMasterToggle() {
     chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
       if (tabs[0]?.id) chrome.tabs.sendMessage(tabs[0].id, { action: 'set_enabled', enabled });
     });
+    scheduleAutoSave();
   });
 }
 
@@ -680,6 +687,13 @@ function showSaveError(msg) {
     status.classList.add('error', 'show');
     setTimeout(() => { status.classList.remove('error', 'show'); status.textContent = ''; }, 4000);
   }
+}
+
+function scheduleAutoSave() {
+  if (autoSaveTimer) clearTimeout(autoSaveTimer);
+  autoSaveTimer = setTimeout(() => {
+    save();
+  }, 2000);
 }
 
 // ── Helpers ───────────────────────────────────────────────
