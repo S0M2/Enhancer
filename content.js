@@ -243,13 +243,22 @@ main, #main, [role="main"], .container, .container-fluid {
 
 /* Cards & sections */
 .card, .well, .panel, .box, .section {
-  background: var(--portal-bg2) !important;
-  border-color: rgba(${textRGB}, 0.1) !important;
+  background: linear-gradient(135deg, var(--portal-bg2), var(--portal-bg3)) !important;
+  border: 1px solid rgba(${textRGB}, 0.12) !important;
+  border-radius: 14px !important;
   color: var(--portal-text) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+
+.card:hover, .well:hover, .panel:hover, .box:hover, .section:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25) !important;
+  border-color: var(--portal-accent) !important;
 }
 
 .card-body, .well-body, .panel-body {
-  background: var(--portal-bg2) !important;
+  background: transparent !important;
   color: var(--portal-text) !important;
 }
 
@@ -272,18 +281,24 @@ a:hover {
 
 /* Bookmarks */
 .bookmark {
-  background: var(--portal-bg2) !important;
-  border-color: rgba(${textRGB}, 0.1) !important;
+  background: linear-gradient(135deg, var(--portal-bg2), var(--portal-bg3)) !important;
+  border: 1px solid rgba(${textRGB}, 0.12) !important;
+  border-radius: 12px !important;
   color: var(--portal-text) !important;
+  padding: 16px !important;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
 }
 
 .bookmark-title {
   color: var(--portal-text) !important;
+  font-weight: 700 !important;
 }
 
 .bookmark:hover {
-  background: var(--portal-bg3) !important;
+  background: linear-gradient(135deg, var(--portal-accent), var(--portal-bg2)) !important;
   border-color: var(--portal-accent) !important;
+  transform: translateY(-3px) scale(1.02) !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2) !important;
 }
 
 /* Announcements */
@@ -300,23 +315,39 @@ a:hover {
 
 /* Navbar */
 .navbar, nav, header, .fixed-top {
-  background: var(--portal-bg2) !important;
-  opacity: 0.98;
-  backdrop-filter: blur(12px) !important;
-  border-bottom: 1px solid rgba(${textRGB}, 0.1) !important;
+  background: linear-gradient(135deg, var(--portal-bg2), var(--portal-bg1)) !important;
+  opacity: 0.99;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border-bottom: 1px solid rgba(${textRGB}, 0.12) !important;
   color: var(--portal-text) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
+  transition: all 0.3s ease !important;
 }
 
 .navbar-brand, .site-name {
   color: var(--portal-text) !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.5px !important;
+  transition: all 0.2s ease !important;
+}
+
+.navbar-brand:hover, .site-name:hover {
+  transform: scale(1.02) !important;
 }
 
 .nav-link {
   color: var(--portal-muted) !important;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  font-weight: 600 !important;
+  padding: 8px 16px !important;
+  border-radius: 8px !important;
 }
 
 .nav-link:hover, .nav-link.active {
   color: var(--portal-accent) !important;
+  background: rgba(var(--portal-accent-rgb, 99, 102, 241), 0.1) !important;
+  transform: translateY(-2px) !important;
 }
 
 /* Inputs & forms */
