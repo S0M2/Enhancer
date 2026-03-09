@@ -614,23 +614,38 @@ function save() {
     showRecent: moodleSettings.recent,
   };
 
-  chrome.storage.local.set(
-    { courseSettings, moodleSettings: ms, portalSettings, customCSS, extensionEnabled: enabled },
-    () => {
-      chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
-        if (tabs[0]?.id) {
-          chrome.tabs.sendMessage(tabs[0].id, {
-            action: 'apply_settings',
-            settings: courseSettings,
-            moodleSettings: ms,
-            portalSettings,
-            customCSS,
-          });
-        }
-      });
-      showSaveConfirm();
+  const payload = {
+    courseSettings,
+    moodleSettings: ms,
+    portalSettings,
+    customCSS,
+    extensionEnabled: enabled,
+  };
+
+  chrome.storage.local.set(payload, () => {
+    if (chrome.runtime.lastError) {
+      console.error('Storage error:', chrome.runtime.lastError);
+      showSaveError('Erreur de sauvegarde');
+      return;
     }
-  );
+    
+    chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+      if (tabs[0]?.id) {
+        chrome.tabs.sendMessage(tabs[0].id, {
+          action: 'apply_settings',
+          settings: courseSettings,
+          moodleSettings: ms,
+          portalSettings,
+          customCSS,
+        }, (response) => {
+          if (chrome.runtime.lastError) {
+            console.warn('Tab message error:', chrome.runtime.lastError);
+          }
+        });
+      }
+    });
+    showSaveConfirm();
+  });
 }
 
 function showSaveConfirm() {
@@ -649,6 +664,15 @@ function showSaveConfirm() {
     label.textContent = 'Sauvegarder & Appliquer';
     btn.classList.remove('saved');
   }, 2000);
+}
+
+function showSaveError(msg) {
+  const status = document.getElementById('statusMsg');
+  if (status) {
+    status.textContent = '✗ ' + msg;
+    status.classList.add('error', 'show');
+    setTimeout(() => { status.classList.remove('error', 'show'); status.textContent = ''; }, 4000);
+  }
 }
 
 // ── Helpers ───────────────────────────────────────────────
