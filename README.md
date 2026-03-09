@@ -4,7 +4,7 @@
 
 **L'extension Chrome qui transforme ton expérience sur le Portail et Moodle HENALLUX**
 
-![Version](https://img.shields.io/badge/version-3.4.0-6366f1?style=for-the-badge&labelColor=0d1117)
+![Version](https://img.shields.io/badge/version-3.5.0-6366f1?style=for-the-badge&labelColor=0d1117)
 ![Manifest](https://img.shields.io/badge/Manifest-V3-22c55e?style=for-the-badge&labelColor=0d1117)
 ![Chrome](https://img.shields.io/badge/Chrome-Compatible-4285F4?style=for-the-badge&logo=googlechrome&logoColor=white&labelColor=0d1117)
 
@@ -160,6 +160,25 @@ PortalRefound-Chromium/
 ---
 
 ## 📝 Changelog
+
+### v3.5 (Janvier 2025) — 🎨 **Premium UI Overhaul**
+- 🎨 **Dashboard CSS rewrite** — Gradients, shadows, et transitions premium partout
+- 🎨 **Agenda cards** — Hover shine effects, gradient backgrounds, optimized spacing
+- 🎨 **Modal dialog** — Enhanced with modal slide-in animations et style gradients
+- 🎨 **Navbar Portal** — Backdrop blur (16px), gradients, smooth hover transitions
+- 🎨 **Bookmarks** — Premium gradient backgrounds, scale effects on hover
+- 🎨 **Typography** — Enhanced letter-spacing, font-weights, color contrast
+- 🐛 Fix boutons accent dans popup (espaces dans templates fix automatiquement)
+- ✅ Tous les fichiers passent validation Node.js syntax
+
+### v3.4 (Janvier 2025) — 🔧 **Critical Fixes**
+- 🐛 **Fix syntax error** — Suppression des closing blocks en doublon dans `injectMoodleCSS()`
+- 🐛 **Fix theme system** — Portal applique correctement le thème sur load
+- 🐛 **Fix CSS invalid** — Correction de la syntaxe rgba() dans navbar
+- 🐛 **Fix HTML rendering** — Suppression des espaces dans template literals (buildListView/buildWeekView)
+- 🐛 **Fix date parsing** — Correction du format de date pour éviter "Invalid Date"
+- 🧹 Manifest Firefox compatible
+- 🎨 Dashboard styling enhanced with animations
 
 ### v3.2 (Mars 2026)
 - 🐛 **Fix performances critiques** — Résolution des boucles infinies MutationObserver qui causaient 100% CPU

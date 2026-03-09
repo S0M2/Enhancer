@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Enhancer",
-  "version": "3.4.0",
+  "version": "3.5.0",
   "description": "Agenda, couleurs, personnalisation complète du Portail & Moodle",
   "permissions": [
     "storage",
