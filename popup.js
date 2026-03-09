@@ -166,7 +166,11 @@ function syncCoursesFromTab() {
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     if (!tabs[0]?.id) return;
     chrome.tabs.sendMessage(tabs[0].id, { action: 'get_courses' }, (res) => {
-      if (chrome.runtime.lastError || !res?.courses) return;
+      if (chrome.runtime.lastError) {
+        console.warn('Could not sync courses from tab:', chrome.runtime.lastError);
+        return;
+      }
+      if (!res?.courses || !Array.isArray(res.courses)) return;
       const added = res.courses.filter(c => !knownCourses.includes(c));
       if (!added.length) return;
       knownCourses = [...new Set([...knownCourses, ...added])].sort();
@@ -603,63 +607,68 @@ function bindSave() {
 }
 
 function save() {
-  customCSS.moodle = document.getElementById('cssMoodle')?.value || '';
-  customCSS.portal = document.getElementById('cssPortal')?.value || '';
+  try {
+    customCSS.moodle = (document.getElementById('cssMoodle')?.value || '').trim();
+    customCSS.portal = (document.getElementById('cssPortal')?.value || '').trim();
 
-  document.querySelectorAll('#colorList .color-row').forEach(row => {
-    const name = row.querySelector('.course-name')?.title;
-    if (!name) return;
-    const hexInp = row.querySelector('.hex-input');
-    const visCb = row.querySelector('.vis-check');
-    const linkInp = row.querySelector('.link-input');
-    const s = ensureSetting(name);
-    const v = hexInp?.value?.trim();
-    if (v && HEX_RE.test(v)) s.color = v;
-    if (visCb) s.visible = visCb.checked;
-    if (linkInp) s.link = linkInp.value.trim();
-  });
-
-  // Build moodleSettings with legacy compat keys
-  const ms = {
-    ...moodleSettings,
-    darkEnabled: moodleSettings.dark,
-    showTimeline: moodleSettings.timeline,
-    showCalendar: moodleSettings.calendar,
-    showRecent: moodleSettings.recent,
-  };
-
-  const payload = {
-    courseSettings,
-    moodleSettings: ms,
-    portalSettings,
-    customCSS,
-    extensionEnabled: enabled,
-  };
-
-  chrome.storage.local.set(payload, () => {
-    if (chrome.runtime.lastError) {
-      console.error('Storage error:', chrome.runtime.lastError);
-      showSaveError('Erreur de sauvegarde');
-      return;
-    }
-    
-    chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
-      if (tabs[0]?.id) {
-        chrome.tabs.sendMessage(tabs[0].id, {
-          action: 'apply_settings',
-          settings: courseSettings,
-          moodleSettings: ms,
-          portalSettings,
-          customCSS,
-        }, (response) => {
-          if (chrome.runtime.lastError) {
-            console.warn('Tab message error:', chrome.runtime.lastError);
-          }
-        });
-      }
+    document.querySelectorAll('#colorList .color-row').forEach(row => {
+      const name = row.querySelector('.course-name')?.title;
+      if (!name || typeof name !== 'string') return;
+      const hexInp = row.querySelector('.hex-input');
+      const visCb = row.querySelector('.vis-check');
+      const linkInp = row.querySelector('.link-input');
+      const s = ensureSetting(name);
+      const v = hexInp?.value?.trim();
+      if (v && HEX_RE.test(v)) s.color = v;
+      if (visCb) s.visible = visCb.checked;
+      if (linkInp) s.link = linkInp.value.trim().slice(0, 2048); // Max URL length
     });
-    showSaveConfirm();
-  });
+
+    // Build moodleSettings with legacy compat keys
+    const ms = {
+      ...moodleSettings,
+      darkEnabled: moodleSettings.dark,
+      showTimeline: moodleSettings.timeline,
+      showCalendar: moodleSettings.calendar,
+      showRecent: moodleSettings.recent,
+    };
+
+    const payload = {
+      courseSettings,
+      moodleSettings: ms,
+      portalSettings,
+      customCSS,
+      extensionEnabled: enabled,
+    };
+
+    chrome.storage.local.set(payload, () => {
+      if (chrome.runtime.lastError) {
+        console.error('Storage error:', chrome.runtime.lastError);
+        showSaveError('Erreur de sauvegarde');
+        return;
+      }
+      
+      chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+        if (tabs[0]?.id) {
+          chrome.tabs.sendMessage(tabs[0].id, {
+            action: 'apply_settings',
+            settings: courseSettings,
+            moodleSettings: ms,
+            portalSettings,
+            customCSS,
+          }, (response) => {
+            if (chrome.runtime.lastError) {
+              console.warn('Tab message error:', chrome.runtime.lastError);
+            }
+          });
+        }
+      });
+      showSaveConfirm();
+    });
+  } catch (err) {
+    console.error('Error saving settings:', err);
+    showSaveError('Erreur lors de la sauvegarde');
+  }
 }
 
 function showSaveConfirm() {
