@@ -4,7 +4,7 @@
 
 **L'extension Chrome qui transforme ton expérience sur le Portail et Moodle HENALLUX**
 
-![Version](https://img.shields.io/badge/version-3.2-6366f1?style=for-the-badge&labelColor=0d1117)
+![Version](https://img.shields.io/badge/version-3.4.0-6366f1?style=for-the-badge&labelColor=0d1117)
 ![Manifest](https://img.shields.io/badge/Manifest-V3-22c55e?style=for-the-badge&labelColor=0d1117)
 ![Chrome](https://img.shields.io/badge/Chrome-Compatible-4285F4?style=for-the-badge&logo=googlechrome&logoColor=white&labelColor=0d1117)
 
@@ -51,7 +51,27 @@
 
 ---
 
-## 🚀 Installation
+## � Changelog v3.4.0
+
+### 🐛 Corrections de bugs
+- **Critique**: Fixe les paramètres du Portail qui n'étaient pas complètement initialisés
+- **Gestion d'erreur**: Ajoute la validation des données du stockage et les vérifications d'erreur
+- **Validation**: Améliore la robustesse avec try-catch et vérification des types de données
+
+### ✨ Nouvelles fonctionnalités
+- **Auto-save**: Les paramètres se sauvegardent automatiquement 2 secondes après modification
+- **Feedback utilisateur**: Affichage des messages d'erreur avec codes visuels
+- **Bookmark toggles**: Ajout des contrôles pour afficher/masquer les catégories de liens du Portail
+
+### 🎨 Améliorations UI/UX
+- Transitions plus fluides (cubic-bezier easing)
+- Meilleure lisibilité (line-height et letter-spacing)
+- Effets 3D sur les onglets (transform Y)
+- Amélioration générale du polish et de la réactivité
+
+---
+
+## �🚀 Installation
 
 ### Depuis les fichiers sources (développement)
 
