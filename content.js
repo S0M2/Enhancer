@@ -300,7 +300,8 @@ a:hover {
 
 /* Navbar */
 .navbar, nav, header, .fixed-top {
-  background: rgba(var(--portal-bg), 0.95) !important;
+  background: var(--portal-bg2) !important;
+  opacity: 0.98;
   backdrop-filter: blur(12px) !important;
   border-bottom: 1px solid rgba(${textRGB}, 0.1) !important;
   color: var(--portal-text) !important;
