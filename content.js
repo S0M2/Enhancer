@@ -1628,6 +1628,49 @@ function injectDashboardCSS() {
 :: -webkit-scrollbar-track { background: transparent; }
 :: -webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
 :: -webkit-scrollbar-thumb:hover { background: rgba(99, 102, 241, 0.5); }
+
+/* ═══ RESPONSIVE MOBILE-FIRST ═══ */
+@media (max-width: 480px) {
+  #cce-agenda { padding: 16px 12px !important; }
+  .cce-bar { flex-direction: column !important; gap: 12px !important; padding: 12px 16px !important; }
+  .cce-bar-title { font-size: 16px !important; }
+  #cce-banner { grid-template-columns: 1fr !important; }
+  .cce-bc { padding: 12px 16px !important; }
+  .cce-card { padding: 10px 12px !important; }
+  .cce-time { font-size: 11px !important; }
+  .cce-name { font-size: 12px !important; }
+  .cce-room { font-size: 11px !important; }
+  .cce-mc { min-height: 60px !important; padding: 4px !important; }
+  .cce-mc-n { width: 20px !important; height: 20px !important; }
+  .cce-we-time { font-size: 9px !important; }
+  .cce-we-name { font-size: 10px !important; }
+  #cce-modal { max-width: 95vw !important; }
+  .cce-m { padding: 14px !important; }
+  .cce-m-grid { grid-template-columns: 1fr !important; }
+}
+
+@media (max-height: 600px) {
+  .cce-bar { padding: 10px 14px !important; }
+  .cce-card { padding: 8px 12px !important; margin-bottom: 2px !important; }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .cce-btn, .cce-card, .cce-bc, button, a { min-height: 44px !important; }
+  .cce-btn { padding: 12px 16px !important; }
+}
+
+@media (min-width: 768px) {
+  #cce-banner { grid-template-columns: 1fr 1fr !important; }
+  .cce-card { display: flex !important; align-items: center !important; gap: 12px !important; }
+}
+
+@media (min-width: 1200px) {
+  #cce-agenda { max-width: 1400px !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
 `;
   document.head.appendChild(s);
 }
